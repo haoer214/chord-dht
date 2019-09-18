@@ -3,6 +3,7 @@ import java.math.BigInteger;
 import java.net.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.*;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -27,6 +28,13 @@ public class NodeDHT implements Runnable
     private static String myport;
     private static Vector<Node> nodeList = new Vector<Node>();
     private static HashMap<Identification, String> IdentMap= new HashMap<Identification, String>();
+    // v2增：连接mysql所需要的成员变量
+    private static String driver;
+    private static String url;
+    private static String user;
+    private static String pass;
+    private static Connection conn;
+
 
     public NodeDHT(Socket s, int i) {
         this.connection = s;
@@ -247,31 +255,107 @@ public class NodeDHT implements Runnable
     }
     
     public static String makeConnection(String ip, String port, String message) throws Exception {
-            if(myIP.equals(ip) && myport.equals(port)) {
-            	String response = considerInput(message);
-                return response;
-            }
-            else {
-            	 Socket sendingSocket = new Socket(ip,Integer.parseInt(port));
-                 DataOutputStream out = new DataOutputStream(sendingSocket.getOutputStream());
-                 BufferedReader inFromServer = new BufferedReader(new InputStreamReader(sendingSocket.getInputStream()));
+        if(myIP.equals(ip) && myport.equals(port)) {
+        	String response = considerInput(message);
+            return response;
+        }
+        else {
+        	 Socket sendingSocket = new Socket(ip,Integer.parseInt(port));
+             DataOutputStream out = new DataOutputStream(sendingSocket.getOutputStream());
+             BufferedReader inFromServer = new BufferedReader(new InputStreamReader(sendingSocket.getInputStream()));
 
-                 out.writeBytes(message + "\n");
+             out.writeBytes(message + "\n");
 
-                 String result = inFromServer.readLine();
-                 
-                 out.close();
-                 inFromServer.close();
-                 sendingSocket.close(); 
-                 return result;
-            }   
+             String result = inFromServer.readLine();
+
+             out.close();
+             inFromServer.close();
+             sendingSocket.close();
+             return result;
+        }
     }
 
+    // v2增：初始化jdbc连接信息，加载mysql驱动，建立Connection
+    public static void initParam(String paramFile) throws Exception {
+        Properties props = new Properties();
+        props.load(new FileInputStream(new File(paramFile)));
+//        System.out.println("配置文件加载成功！");
+        // 通过.ini配置文件进行初始化
+        driver = props.getProperty("driver");
+        url = props.getProperty("url");
+        user = props.getProperty("user");
+        pass = props.getProperty("pass");
+//        System.out.println("配置信息初始化成功！");
+//        System.out.println("driver = " + driver);
+//        System.out.println("url = " + url);
+//        System.out.println("user = " + user);
+//        System.out.println("pass = " + pass);
+        // 加载驱动
+        Class.forName(driver);
+//        System.out.println("驱动加载成功！");
+        // 建立连接
+        conn = DriverManager.getConnection(url,user,pass);
+        System.out.println("数据库连接建立成功！");
+
+    }
+    // v2增：创建数据表node[i]（i表示节点ID）
+    public static void createTable(String sql) throws Exception {
+        try(
+                Statement stmt = conn.createStatement())
+        {
+            stmt.executeUpdate(sql);
+        }
+    }
+    // v2增：添加数据 [Hash, Identity, Content]
+    public static int insertData(String sql) throws Exception {
+        try(
+                Statement stmt = conn.createStatement())
+        {
+            return stmt.executeUpdate(sql);
+        }
+    }
+    // v2增：通过标识解析数据 [Hash, Identity, Content]
+    public static String resolveData(String sql) throws Exception {
+        try(
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql))
+        {
+            String result;
+            if (rs.next()) {
+                result  = "<解析结果>: " + "\n"
+                        + "【哈希】 " + rs.getInt(1) + "\n"
+                        + "【标识】 " + rs.getString(2) + "\n"
+                        + "【内容】 " + rs.getString(3) + "\n";
+            } else {
+                result = "解析失败! 请确认标识是否输入正确 ";
+            }
+            return result;
+        }
+    }
 
     public void run() {
-        if (this.ID == 0) { //ID==0时，第一个加入的节点的入口        
-            System.out.println("正在创建路由表 ... ");
+        if (this.ID == 0) { //ID==0时，第一个加入的节点的入口
 
+            // v2增：初始化数据库连接信息
+            System.out.println("正在连接数据库 ... ");
+            try {
+                initParam("./mysql.ini");
+            } catch (Exception e) {
+                System.out.println("数据库连接失败！");
+            }
+            // v2增：创建数据表
+            System.out.println("正在创建数据表 ... ");
+            try {
+                createTable("create table node" + me.getID()
+                        + "(Hash int primary key, "
+                        + "Identity varchar(255), "
+                        + "Content text);");
+                System.out.println("成功创建数据表【node" + me.getID() + "】");
+            } catch (Exception e) {
+                System.out.println("数据表创建失败！");
+            }
+
+            System.out.println("正在创建路由表 ... ");
             for (int i = 1; i <= m; i++) {
                 finger[i] = new FingerTable();
                 finger[i].setStart((me.getID() + (int)Math.pow(2,i-1)) % numDHT);
@@ -300,6 +384,26 @@ public class NodeDHT implements Runnable
             } catch (Exception e) {}
         }       
         else if (this.ID == -1) {//ID==-1时，非第一个加入的节点的入口
+
+            // v2增：初始化数据库连接信息
+            System.out.println("正在连接数据库 ... ");
+            try {
+                initParam("./mysql.ini");
+            } catch (Exception e) {
+                System.out.println("数据库连接失败！");
+            }
+            // v2增：创建数据表
+            System.out.println("正在创建数据表 ... ");
+            try {
+                createTable("create table node" + me.getID()
+                        + "(Hash int primary key, "
+                        + "Identity varchar(255), "
+                        + "Content text);");
+                System.out.println("成功创建数据表【node" + me.getID() + "】");
+            } catch (Exception e) {
+                System.out.println("数据表创建失败！");
+            }
+
             System.out.println("正在创建路由表 ...");
             for (int i = 1; i <= m; i++) {
                 finger[i] = new FingerTable();
@@ -368,32 +472,37 @@ public class NodeDHT implements Runnable
                 	printSuccessor();
                 }
                 else if(str1.startsWith("insert")) {
-                	String fullIdent=null;
-                	String url=null;
-                	String[] tokens = str1.split("[\\s]+");
-                	fullIdent=tokens[1];
-                	url=tokens[2];
-                
+                	String fullIdent;
+                	String url;
+                	String[] tokens = str1.split("\\s+");
+                    fullIdent = tokens[1];
+                    url = tokens[2];
 					try {
-							InsertIdentification(fullIdent, url);							
+					    InsertIdentification(fullIdent, url);
 							//System.out.println(IdentMap.entrySet());
-						} catch (Exception e) {}
-
+					} catch (Exception e) {
+                        System.out.println("添加数据失败！");
+                    }
                 }
                 else if(str1.startsWith("resolve")) {
-                	String fullIdent=null;
-                	String[] tokens = str1.split("[\\s]+");
+                	String fullIdent;
+                	String[] tokens = str1.split("\\s+");
                 	fullIdent=tokens[1];
                 	
                 	try {
                 		Node locNode=find_successor(HashFunc(fullIdent));
                     	if(locNode.getID()==me.getID()) {
-                    		System.out.println("解析结果："+getUrl(fullIdent));
-                    		System.out.println();
+                    	    // v2增：从本地数据库获取内容
+                            System.out.println(resolveData("select *"
+                                    + " from node" + me.getID()
+                                    + " where Identity='" + fullIdent + "';"));
+
+//                    		System.out.println("解析结果："+getUrl(fullIdent));
+//                    		System.out.println();
                     	}
                     	else {
-                    		System.out.println("解析结果："+makeConnection(locNode.getIP(), locNode.getPort(), "geturl/"+fullIdent));
-                    		System.out.println();
+                    		System.out.println(makeConnection(locNode.getIP(), locNode.getPort(), "geturl/"+fullIdent));
+//                    		System.out.println();
                     	}      
                 	}catch (Exception e) {}
                 }
@@ -509,10 +618,16 @@ public class NodeDHT implements Runnable
         }
         //新添加
         else if (tokens[0].equals("tryInsert")) {
-            tryInsert(tokens[1], tokens[2], tokens[3]);
+            // v2改：新增两个参数tokens[1]、tokens[2]
+            tryInsert(Integer.parseInt(tokens[1]), tokens[2], tokens[3],tokens[4]);
         }
         else if (tokens[0].equals("geturl")) {
-            outResponse=getUrl(tokens[1]+"/"+tokens[2]);
+            // v2增：从本地数据库获取内容
+            outResponse = resolveData("select *"
+                    + " from node" + me.getID()
+                    + " where Identity='" + tokens[1] + "/" + tokens[2] + "';");
+
+//            outResponse=getUrl(tokens[1]+"/"+tokens[2]);
         }
         //新添加
         else if (tokens[0].equals("printNum")) {
@@ -547,17 +662,18 @@ public class NodeDHT implements Runnable
         return outResponse;
     }
     //查找url
-    public static String getUrl(String fullIdent){	
-    	String[] tokens = fullIdent.split("/");
-    	String top=tokens[0];
-    	String second=tokens[1];
-    	Identification dest=new Identification(top, second);
-    	if(IdentMap.containsKey(dest))
-    	    return IdentMap.get(dest); 
-    	else {
-    		return "无法解析";
-    	}
-    }
+    // v2改：暂时先注释掉哈
+//    public static String getUrl(String fullIdent){
+//    	String[] tokens = fullIdent.split("/");
+//    	String top=tokens[0];
+//    	String second=tokens[1];
+//    	Identification dest=new Identification(top, second);
+//    	if(IdentMap.containsKey(dest))
+//    	    return IdentMap.get(dest);
+//    	else {
+//    		return "无法解析";
+//    	}
+//    }
     //向当前节点插入<Identification,url>键值对
     public static void InsertIdentification(String fullIdent, String url) throws Exception { 
     	String[] tokens = fullIdent.split("/");
@@ -567,14 +683,19 @@ public class NodeDHT implements Runnable
     	//System.out.println(second);
     	int kid=HashFunc(fullIdent);//标识的哈希
     	Node temp=find_successor(kid);//应该存储的位置
-    	if(temp.getID()==me.getID()) {
-    		localInsert(top,second,url);
-    	}
-    	else {
-    		makeConnection(temp.getIP(), temp.getPort(), "tryInsert/"+top+"/"+second+"/"+url);
-    		System.out.println("[系统提示]: 标识映射已存入节点"+temp.getID());
-    		System.out.println();
-    	}   	  
+        if (temp.getID() == me.getID()) {
+            // v2增：添加到本地节点数据库列表
+            int currentNums = insertData("insert into node" + me.getID() + "(Hash, Identity, Content)"
+                    + " values(" + kid + ", '" + fullIdent + "', '" + url + "');");
+            System.out.println("[系统提示]: 标识映射 " + fullIdent + "->" + url + " 已存入本地数据库");
+            System.out.println();
+
+            localInsert(top, second, url);
+        } else {
+            makeConnection(temp.getIP(), temp.getPort(), "tryInsert/" + kid + "/" + top + "/" + second + "/" + url);
+            System.out.println("[系统提示]: 标识映射已存入节点" + temp.getID());
+            System.out.println();
+        }
     }
     //新增：将标识映射添加到本地
     public static void localInsert(String top ,String second,String url) {
@@ -582,16 +703,25 @@ public class NodeDHT implements Runnable
     	//IdentificationList.add(newone);
     	//System.out.println(newone.getToplevelIdent()+"/"+newone.getSecondaryIdent());
     	IdentMap.put(newone, url);
-		System.out.println("[系统提示]: 标识映射已存入节点"+me.getID());
-		System.out.println();
+    	//v2改：暂时先注释掉哈
+//		System.out.println("[系统提示]: 标识映射已存入节点"+me.getID());
+//		System.out.println();
     }
     //新增：将标识映射添加到其它节点
-    public static void tryInsert(String top,String second ,String url) {
+    // v2改：添加形参kid、fullIdent，并声明抛出异常
+    public static void tryInsert(int kid, String top,String second ,String url) throws Exception {
+        // v2增：添加到该节点数据库列表
+        insertData("insert into node" + me.getID() + "(Hash, Identity, Content)"
+                + " values(" + kid + ", '" + top + "/" + second + "', '" + url + "');");
+        System.out.println("[系统提示]: 有新标识映射存入本节点");
+        System.out.println("[系统提示]: 标识映射 " + top + "/" + second + "->" + url + " 已存入本地数据库");
+        System.out.println();
+
     	Identification newone= new Identification(top, second);
     	IdentMap.put(newone, url);
-    	System.out.println("[系统提示]: 有新标识映射存入本节点");
-    	System.out.println(newone.getToplevelIdent()+"/"+newone.getSecondaryIdent()+"="+IdentMap.get(newone));
-    	System.out.println();
+    	//v2改：暂时先注释掉哈
+//    	System.out.println(newone.getToplevelIdent()+"/"+newone.getSecondaryIdent()+"="+IdentMap.get(newone));
+//    	System.out.println();
     }
     //初始化路由表
     public static void init_finger_table(Node n) throws Exception {
