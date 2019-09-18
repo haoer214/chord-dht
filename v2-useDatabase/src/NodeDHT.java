@@ -264,7 +264,8 @@ public class NodeDHT implements Runnable
              DataOutputStream out = new DataOutputStream(sendingSocket.getOutputStream());
              BufferedReader inFromServer = new BufferedReader(new InputStreamReader(sendingSocket.getInputStream()));
 
-             out.writeBytes(message + "\n");
+             // v2改：将.writeBytes(str)改为.write(str.getBytes()) --避免中文乱码
+             out.write((message + "\n").getBytes());
 
              String result = inFromServer.readLine();
 
@@ -298,8 +299,16 @@ public class NodeDHT implements Runnable
         System.out.println("数据库连接建立成功！");
 
     }
-    // v2增：创建数据表node[i]（i表示节点ID）
+    // v2增：节点加入时，创建数据表node[i]（i表示节点ID）
     public static void createTable(String sql) throws Exception {
+        try(
+                Statement stmt = conn.createStatement())
+        {
+            stmt.executeUpdate(sql);
+        }
+    }
+    // v2增：节点退出时，删除数据表node[i]（i表示节点ID）
+    public static void deleteTable(String sql) throws Exception {
         try(
                 Statement stmt = conn.createStatement())
         {
@@ -322,10 +331,10 @@ public class NodeDHT implements Runnable
         {
             String result;
             if (rs.next()) {
-                result  = "<解析结果>: " + "\n"
-                        + "【哈希】 " + rs.getInt(1) + "\n"
-                        + "【标识】 " + rs.getString(2) + "\n"
-                        + "【内容】 " + rs.getString(3) + "\n";
+                result  = "<解析结果>: " + "#"
+                        + "【哈希】 " + rs.getInt(1) + "#"
+                        + "【标识】 " + rs.getString(2) + "#"
+                        + "【内容】 " + rs.getString(3) + "#";
             } else {
                 result = "解析失败! 请确认标识是否输入正确 ";
             }
@@ -492,16 +501,17 @@ public class NodeDHT implements Runnable
                 	try {
                 		Node locNode=find_successor(HashFunc(fullIdent));
                     	if(locNode.getID()==me.getID()) {
-                    	    // v2增：从本地数据库获取内容
-                            System.out.println(resolveData("select *"
-                                    + " from node" + me.getID()
-                                    + " where Identity='" + fullIdent + "';"));
+                    	    // v2增：从本地数据库获取内容，并将所有"#"替换为换行符
+                            System.out.println((resolveData("select *" + " from node" + me.getID() + " where Identity='" + fullIdent + "';"))
+                                    .replaceAll("#","\n"));
 
 //                    		System.out.println("解析结果："+getUrl(fullIdent));
 //                    		System.out.println();
                     	}
                     	else {
-                    		System.out.println(makeConnection(locNode.getIP(), locNode.getPort(), "geturl/"+fullIdent));
+                    	    // v2增：从其他节点数据库获取内容，并将所有"#"替换为换行符
+                    		System.out.println(makeConnection(locNode.getIP(), locNode.getPort(), "geturl/"+fullIdent)
+                                    .replaceAll("#","\n"));
 //                    		System.out.println();
                     	}      
                 	}catch (Exception e) {}
@@ -527,12 +537,14 @@ public class NodeDHT implements Runnable
             try {
                 BufferedReader inFromClient =new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 DataOutputStream outToClient = new DataOutputStream(connection.getOutputStream());
-                
+
                 
                 String received = inFromClient.readLine();
                 String response = considerInput(received);
 
-                outToClient.writeBytes(response + "\n");	
+                // v2改：将.writeBytes(str)改为.write(str.getBytes()) --避免中文乱码
+                outToClient.write((response + "\n").getBytes());
+
             } catch (Exception e) {
                 System.out.println("[系统提示]:"+"线程无法服务连接");
             	//e.printStackTrace();
@@ -542,15 +554,24 @@ public class NodeDHT implements Runnable
     }
     
     public void beforeExit() throws Exception{
+        // v2增：节点退出时，删除数据表
     	if(nodeList.size()==1) {
-    		System.out.println("\n"+"[系统提示]: 节点 "+me.getID()+"已经退出DHT网络");
+            deleteTable("drop table node" + me.getID() + ";");
+            System.out.println("\n" + "已删除数据表【node" + me.getID() + "】");
+            System.out.println("[系统提示]: 节点 "+me.getID()+"已经退出DHT网络");
 			System.out.println("[系统提示]: 网络已关闭");
     	}
     	else if(nodeList.size()==2) {
     		makeConnection(finger[1].getSuccessor().getIP(), finger[1].getSuccessor().getPort(), "quitOfTwoNodes/");
+            deleteTable("drop table node" + me.getID() + ";");
+            System.out.println("\n" + "已删除数据表【node" + me.getID() + "】");
+            System.out.println("[系统提示]: 节点 "+me.getID()+"已经退出DHT网络");
     	}
     	else {
     		makeConnection(finger[1].getSuccessor().getIP(), finger[1].getSuccessor().getPort(), "quitOfManyNodes/"+pred.getID()+"/"+pred.getIP()+"/"+pred.getPort());
+            deleteTable("drop table node" + me.getID() + ";");
+            System.out.println("\n" + "已删除数据表【node" + me.getID() + "】");
+            System.out.println("[系统提示]: 节点 "+me.getID()+"已经退出DHT网络");
     	}
     }
     
@@ -622,7 +643,7 @@ public class NodeDHT implements Runnable
             tryInsert(Integer.parseInt(tokens[1]), tokens[2], tokens[3],tokens[4]);
         }
         else if (tokens[0].equals("geturl")) {
-            // v2增：从本地数据库获取内容
+            // v2增：从本地数据库提取标识内容
             outResponse = resolveData("select *"
                     + " from node" + me.getID()
                     + " where Identity='" + tokens[1] + "/" + tokens[2] + "';");
