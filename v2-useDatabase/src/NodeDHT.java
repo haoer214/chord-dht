@@ -900,7 +900,6 @@ public class NodeDHT implements Runnable
     //更新路由表
     public static void update_finger_table(Node s, int i) throws Exception // RemoteException,
            {
-
                Node p;
                int normalInterval = 1;
                int myID = me.getID();
