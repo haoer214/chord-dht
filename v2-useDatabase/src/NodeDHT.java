@@ -189,7 +189,9 @@ public class NodeDHT implements Runnable
                 nodeID = Math.abs(hashNum.intValue()) % numDHT;
                 
                 initInfo = nodeID;
-            } catch (NoSuchAlgorithmException nsae){}
+            } catch (NoSuchAlgorithmException nsae){
+                nsae.printStackTrace();
+            }
             
             return initInfo; 
         } else {
@@ -198,6 +200,10 @@ public class NodeDHT implements Runnable
     } 
 
     //改动：修改了确定冲突的方式
+    /*
+     * 可否将新节点IP、端口直接发送给已知节点进行hash计算，并比较判断是否冲突
+     * 这样的话，即便产生冲突，只需要已知节点重新计算即可，新节点仅需makeConnection一次
+     */
     public static int getNodeInfo(String nodeIP, String nodePort) throws Exception{
         if (busy == 0) { 
             synchronized (object) { 
@@ -231,7 +237,9 @@ public class NodeDHT implements Runnable
     
                 initInfo = nodeID;
     
-            } catch (NoSuchAlgorithmException nsae){}
+            } catch (NoSuchAlgorithmException nsae){
+                nsae.printStackTrace();
+            }
             
             return initInfo; 
         } else {
@@ -249,7 +257,9 @@ public class NodeDHT implements Runnable
             BigInteger hashNum = new BigInteger(1,hashBytes);
             
             KID = Math.abs(hashNum.intValue()) % numDHT;
-    	}catch (Exception e) {}
+    	}catch (Exception e) {
+            e.printStackTrace();
+        }
            
         return KID;
     }
@@ -301,6 +311,22 @@ public class NodeDHT implements Runnable
     }
     // v2增：节点加入时，创建数据表node[i]（i表示节点ID）
     public static void createTable(String sql) throws Exception {
+        try(
+                Statement stmt = conn.createStatement())
+        {
+            stmt.executeUpdate(sql);
+        }
+    }
+    // v2增：节点加入时，部分数据从后继迁移到新节点
+    public static void transferPart(String sql) throws Exception {
+        try(
+                Statement stmt = conn.createStatement())
+        {
+            stmt.executeUpdate(sql);
+        }
+    }
+    // v2增：节点退出时，数据迁移到后继节点
+    public static void transferAll(String sql) throws Exception {
         try(
                 Statement stmt = conn.createStatement())
         {
@@ -386,12 +412,17 @@ public class NodeDHT implements Runnable
             	System.out.println("开始创建节点列表...");
             	add(me);
 				System.out.println("节点列表创建完成");
-			} catch (Exception e1) {}
+			} catch (Exception e) {
+                e.printStackTrace();
+            }
             
             try { 
                 finishJoiningFirst(me.getID());//释放对象锁
-            } catch (Exception e) {}
-        }       
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         else if (this.ID == -1) {//ID==-1时，非第一个加入的节点的入口
 
             // v2增：初始化数据库连接信息
@@ -444,16 +475,42 @@ public class NodeDHT implements Runnable
             } catch (Exception e) {
             	e.printStackTrace();
             }
-            
+
+            // v2增：将部分数据从后继迁移到当前节点
+            if (me.getID() > finger[1].getSuccessor().getID()) { // 新加入节点ID大于后继
+                try {
+                    transferPart("insert into node" + me.getID()
+                            + " select * from node" + finger[1].getSuccessor().getID()
+                            + " where Hash<=" + me.getID() + "&&Hash>" + finger[1].getSuccessor().getID() + ";");
+                    transferPart("delete from node" + finger[1].getSuccessor().getID()
+                            + " where Hash<=" + me.getID() + "&&Hash>" + finger[1].getSuccessor().getID() + ";");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else { // 新加入节点ID小于后继
+                try {
+                    transferPart("insert into node" + me.getID()
+                            + " select * from node" + finger[1].getSuccessor().getID()
+                            + " where Hash<=" + me.getID() + "||Hash>" + finger[1].getSuccessor().getID() + ";");
+                    transferPart("delete from node" + finger[1].getSuccessor().getID()
+                            + " where Hash<=" + me.getID() + "||Hash>" + finger[1].getSuccessor().getID() + ";");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
             try { 
-                    finishJoining(me.getID());//
-            } catch (Exception e) {}
+                    finishJoining(me.getID());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        else if (this.ID == -2) {//指令集
+
+        else if (this.ID == -2) { // 指令集
             Scanner scan = new Scanner(System.in);
             while (scan.hasNext()) {
                 String str1 = scan.nextLine();
-                if(str1.equals("exit")){
+                if(str1.equals("exit")){ // 节点退出
                     try {
 						beforeExit();	   
 					} catch (Exception e) {
@@ -480,6 +537,15 @@ public class NodeDHT implements Runnable
                 else if(str1.equals("printsuc")) {
                 	printSuccessor();
                 }
+                /*
+                 * 这里需要改一下insert的异常处理
+                 * 尽管第一个字符串是insert，但之后输入的字符串若不满足条件（比如个数不符合），就会阻塞线程
+                 * 可以考虑先输入一个insert，然后依次弹出输入标识、内容的提示，例如：
+                 * # insert
+                 * # 请输入标识：xx
+                 * # 请输入内容：xxx
+                 * #【系统提示：注册成功！】
+                 */
                 else if(str1.startsWith("insert")) {
                 	String fullIdent;
                 	String url;
@@ -493,35 +559,48 @@ public class NodeDHT implements Runnable
                         System.out.println("添加数据失败！");
                     }
                 }
+                /*
+                 * 问题同上，可考虑改为如下形式
+                 * # resolve
+                 * # 请输入标识：xx
+                 * # <解析结果>：
+                 * # ……
+                 */
                 else if(str1.startsWith("resolve")) {
                 	String fullIdent;
                 	String[] tokens = str1.split("\\s+");
                 	fullIdent=tokens[1];
-                	
-                	try {
-                		Node locNode=find_successor(HashFunc(fullIdent));
-                    	if(locNode.getID()==me.getID()) {
-                    	    // v2增：从本地数据库获取内容，并将所有"#"替换为换行符
+
+                    try {
+                        Node locNode = find_successor(HashFunc(fullIdent));
+                        if (locNode.getID() == me.getID()) {
+                            // v2增：从本地数据库获取内容，并将所有"#"替换为换行符
                             System.out.println((resolveData("select *" + " from node" + me.getID() + " where Identity='" + fullIdent + "';"))
-                                    .replaceAll("#","\n"));
+                                    .replaceAll("#", "\n"));
 
 //                    		System.out.println("解析结果："+getUrl(fullIdent));
 //                    		System.out.println();
-                    	}
-                    	else {
-                    	    // v2增：从其他节点数据库获取内容，并将所有"#"替换为换行符
-                    		System.out.println(makeConnection(locNode.getIP(), locNode.getPort(), "geturl/"+fullIdent)
-                                    .replaceAll("#","\n"));
+                        } else {
+                            // v2增：从其他节点数据库获取内容，并将所有"#"替换为换行符
+                            System.out.println(makeConnection(locNode.getIP(), locNode.getPort(), "geturl/" + fullIdent)
+                                    .replaceAll("#", "\n"));
 //                    		System.out.println();
-                    	}      
-                	}catch (Exception e) {}
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
+                /*
+                 * 若标识不存在，依旧会返回理应存储该标识的节点
+                 */
                 else if(str1.startsWith("find")) {
                 	String[] tokens = str1.split("\\s+");
                 	try {
 						System.out.println("[系统提示]: 此映射存储于节点"+find_successor((HashFunc(tokens[1]))).getID());
 						System.out.println();
-					} catch (Exception e) {}
+					} catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 else if(str1.startsWith("printident")){
                 	printIdent();
@@ -554,21 +633,29 @@ public class NodeDHT implements Runnable
     }
     
     public void beforeExit() throws Exception{
-        // v2增：节点退出时，删除数据表
     	if(nodeList.size()==1) {
+            // v2增：节点退出时，删除数据表
             deleteTable("drop table node" + me.getID() + ";");
             System.out.println("\n" + "已删除数据表【node" + me.getID() + "】");
             System.out.println("[系统提示]: 节点 "+me.getID()+"已经退出DHT网络");
 			System.out.println("[系统提示]: 网络已关闭");
     	}
     	else if(nodeList.size()==2) {
+    	    // v2增：数据迁移到后继节点
+            transferAll("insert into node" + finger[1].getSuccessor().getID()
+                    + " select * from node" + me.getID() + ";");
     		makeConnection(finger[1].getSuccessor().getIP(), finger[1].getSuccessor().getPort(), "quitOfTwoNodes/");
+            // v2增：删除数据表
             deleteTable("drop table node" + me.getID() + ";");
             System.out.println("\n" + "已删除数据表【node" + me.getID() + "】");
             System.out.println("[系统提示]: 节点 "+me.getID()+"已经退出DHT网络");
     	}
     	else {
+            // v2增：数据迁移到后继节点
+            transferAll("insert into node" + finger[1].getSuccessor().getID()
+                    + " select * from node" + me.getID() + ";");
     		makeConnection(finger[1].getSuccessor().getIP(), finger[1].getSuccessor().getPort(), "quitOfManyNodes/"+pred.getID()+"/"+pred.getIP()+"/"+pred.getPort());
+            // v2增：删除数据表
             deleteTable("drop table node" + me.getID() + ";");
             System.out.println("\n" + "已删除数据表【node" + me.getID() + "】");
             System.out.println("[系统提示]: 节点 "+me.getID()+"已经退出DHT网络");
@@ -729,7 +816,7 @@ public class NodeDHT implements Runnable
 //		System.out.println();
     }
     //新增：将标识映射添加到其它节点
-    // v2改：添加形参kid、fullIdent，并声明抛出异常
+    // v2改：添加形参kid，并声明抛出异常
     public static void tryInsert(int kid, String top,String second ,String url) throws Exception {
         // v2增：添加到该节点数据库列表
         insertData("insert into node" + me.getID() + "(Hash, Identity, Content)"
@@ -1042,6 +1129,12 @@ public class NodeDHT implements Runnable
     }
     //新增：打印映射
     public static void printIdent() {
+        /*
+         * 是不是可以改为Set<Identification> ms = IdentMap.keySet();
+        for (Identification key : ms) {
+			System.out.println((count++)+"."+key.getToplevelIdent()+"/"+key.getSecondaryIdent()+"="+IdentMap.get(key));
+		}
+         */
     	Set<Entry<Identification,String>> ms =IdentMap.entrySet();
     	System.out.println("******标识映射*****");
     	int count=1;
