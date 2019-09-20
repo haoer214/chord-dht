@@ -341,6 +341,15 @@ public class NodeDHT implements Runnable
             stmt.executeUpdate(sql);
         }
     }
+    // v2增：判断标识是否已被注册
+    public static boolean ifExist(String sql) throws Exception {
+        try(
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql))
+        {
+            return rs.next();
+        }
+    }
     // v2增：添加数据 [Hash, Identity, Content]
     public static int insertData(String sql) throws Exception {
         try(
@@ -362,7 +371,7 @@ public class NodeDHT implements Runnable
                         + "【标识】 " + rs.getString(2) + "#"
                         + "【内容】 " + rs.getString(3) + "#";
             } else {
-                result = "解析失败! 请确认标识是否输入正确 ";
+                result = "解析失败! 请确认标识是否输入正确 " + "#";
             }
             return result;
         }
@@ -382,8 +391,8 @@ public class NodeDHT implements Runnable
             System.out.println("正在创建数据表 ... ");
             try {
                 createTable("create table node" + me.getID()
-                        + "(Hash int primary key, "
-                        + "Identity varchar(255), "
+                        + "(Hash int, "
+                        + "Identity varchar(255) primary key, "
                         + "Content text);");
                 System.out.println("成功创建数据表【node" + me.getID() + "】");
             } catch (Exception e) {
@@ -436,8 +445,8 @@ public class NodeDHT implements Runnable
             System.out.println("正在创建数据表 ... ");
             try {
                 createTable("create table node" + me.getID()
-                        + "(Hash int primary key, "
-                        + "Identity varchar(255), "
+                        + "(Hash int, "
+                        + "Identity varchar(255) primary key, "
                         + "Content text);");
                 System.out.println("成功创建数据表【node" + me.getID() + "】");
             } catch (Exception e) {
@@ -556,7 +565,7 @@ public class NodeDHT implements Runnable
 					    InsertIdentification(fullIdent, url);
 							//System.out.println(IdentMap.entrySet());
 					} catch (Exception e) {
-                        System.out.println("添加数据失败！");
+                        System.out.println("添加数据失败！" + "\n");
                     }
                 }
                 /*
@@ -616,7 +625,6 @@ public class NodeDHT implements Runnable
             try {
                 BufferedReader inFromClient =new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 DataOutputStream outToClient = new DataOutputStream(connection.getOutputStream());
-
                 
                 String received = inFromClient.readLine();
                 String response = considerInput(received);
@@ -783,22 +791,28 @@ public class NodeDHT implements Runnable
 //    	}
 //    }
     //向当前节点插入<Identification,url>键值对
-    public static void InsertIdentification(String fullIdent, String url) throws Exception { 
+    public static void InsertIdentification(String fullIdent, String url) throws Exception {
     	String[] tokens = fullIdent.split("/");
     	String top=tokens[0];
     	String second=tokens[1];
-    	//System.out.println(top);
-    	//System.out.println(second);
     	int kid=HashFunc(fullIdent);//标识的哈希
     	Node temp=find_successor(kid);//应该存储的位置
         if (temp.getID() == me.getID()) {
-            // v2增：添加到本地节点数据库列表
-            int currentNums = insertData("insert into node" + me.getID() + "(Hash, Identity, Content)"
-                    + " values(" + kid + ", '" + fullIdent + "', '" + url + "');");
-            System.out.println("[系统提示]: 标识映射 " + fullIdent + "->" + url + " 已存入本地数据库");
-            System.out.println();
+            // v2增：判断标识是否已被注册
+            if (ifExist("select * from node" + me.getID()
+                    + " where Identity='" + fullIdent + "';")) {
+                System.out.println("[系统提示]: 当前标识已被注册！");
+                System.out.println();
+            } else {
+                // v2增：添加到本地节点数据库列表
+                insertData("insert into node" + me.getID() + "(Hash, Identity, Content)"
+                        + " values(" + kid + ", '" + fullIdent + "', '" + url + "');");
+                System.out.println("[系统提示]: 标识映射 " + fullIdent + "->" + url + " 已存入本地数据库");
+                System.out.println();
 
-            localInsert(top, second, url);
+                localInsert(top, second, url);
+            }
+
         } else {
             makeConnection(temp.getIP(), temp.getPort(), "tryInsert/" + kid + "/" + top + "/" + second + "/" + url);
             System.out.println("[系统提示]: 标识映射已存入节点" + temp.getID());
@@ -818,18 +832,25 @@ public class NodeDHT implements Runnable
     //新增：将标识映射添加到其它节点
     // v2改：添加形参kid，并声明抛出异常
     public static void tryInsert(int kid, String top,String second ,String url) throws Exception {
-        // v2增：添加到该节点数据库列表
-        insertData("insert into node" + me.getID() + "(Hash, Identity, Content)"
-                + " values(" + kid + ", '" + top + "/" + second + "', '" + url + "');");
-        System.out.println("[系统提示]: 有新标识映射存入本节点");
-        System.out.println("[系统提示]: 标识映射 " + top + "/" + second + "->" + url + " 已存入本地数据库");
-        System.out.println();
+        // v2增：判断标识是否已被注册
+        if (ifExist("select * from node" + me.getID()
+                + " where Identity='" + top + "/" + second + "';")) {
+            System.out.println("[系统提示]: 当前标识已被注册！");
+            System.out.println();
+        } else {
+            // v2增：添加到该节点数据库列表
+            insertData("insert into node" + me.getID() + "(Hash, Identity, Content)"
+                    + " values(" + kid + ", '" + top + "/" + second + "', '" + url + "');");
+            System.out.println("[系统提示]: 有新标识映射存入本节点");
+            System.out.println("[系统提示]: 标识映射 " + top + "/" + second + "->" + url + " 已存入本地数据库");
+            System.out.println();
 
-    	Identification newone= new Identification(top, second);
-    	IdentMap.put(newone, url);
-    	//v2改：暂时先注释掉哈
+            Identification newone= new Identification(top, second);
+            IdentMap.put(newone, url);
+            //v2改：暂时先注释掉哈
 //    	System.out.println(newone.getToplevelIdent()+"/"+newone.getSecondaryIdent()+"="+IdentMap.get(newone));
 //    	System.out.println();
+        }
     }
     //初始化路由表
     public static void init_finger_table(Node n) throws Exception {
