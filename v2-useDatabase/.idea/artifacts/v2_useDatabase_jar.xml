@@ -1,9 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="v2-useDatabase:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/v2_useDatabase_jar</output-path>
-    <root id="archive" name="v2-useDatabase.jar">
-      <element id="module-output" name="v2-useDatabase" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/../../../jar包/mysql-connector-java-5.1.44.jar" path-in-jar="/" />
-    </root>
-  </artifact>
-</component>
