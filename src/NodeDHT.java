@@ -52,13 +52,13 @@ public class NodeDHT implements Runnable {
             numDHT = (int)Math.pow(2,m);
          
             InetAddress mIP = InetAddress.getLocalHost();
-            myIP=mIP.getHostAddress();
+            myIP = mIP.getHostAddress();
             System.out.println("本节点IP地址: " + myIP );
 
             int initInfo = getFirstNodeInfo(myIP,myport);
             me = new Node(initInfo,myIP,myport);
-            pred=me;
-            System.out.println("节点ID:"+me.getID() + "   前继节点ID:" +pred.getID());
+            pred = me;
+            System.out.println("节点ID:" + me.getID() + "   前继节点ID:" + pred.getID());
 
             // '第一个节点加入'的线程
             Runnable runnable = new NodeDHT(null,0);
@@ -358,6 +358,7 @@ public class NodeDHT implements Runnable {
         }
     }
 
+    @Override
     public void run() {
         if (this.ID == 0) { //ID==0时，第一个加入的节点的入口
 
@@ -542,7 +543,7 @@ public class NodeDHT implements Runnable {
                     ObjectOutputStream outToControllerOrOtherNodes = new ObjectOutputStream(connection.getOutputStream());
                     ObjectInputStream inFromControllerOrOtherNodes = new ObjectInputStream(connection.getInputStream()))
             {
-                
+                System.out.println("尝试读取对象...");
                 Message received_message = (Message)inFromControllerOrOtherNodes.readObject();
                 System.out.println(received_message.getInitNode_flag());
                 System.out.println(received_message.getInitInfo());
@@ -554,36 +555,37 @@ public class NodeDHT implements Runnable {
                     outToControllerOrOtherNodes.writeObject(received_message);
 
                 } else {
-                    outToControllerOrOtherNodes.writeObject(considerType(received_message, received_message.getType()));
+                    outToControllerOrOtherNodes.writeObject(considerType(received_message));
                 }
             } catch (Exception e) {
                 System.out.println("[系统提示]:"+"线程无法服务连接");
-            	//e.printStackTrace();
+            	e.printStackTrace();
             }
         }
     }
     // 对于不同的操作类型，返回不同的 Message 对象
-    public static Message considerType(Message message, String type){
+    public static Message considerType(Message message){
+        System.out.println(message.getType());
         Message result = message;
-        switch (type) {
+        switch (message.getType()) {
             case "getNodeList":
                 result.setNodeList(getNodeList());
                 result.setFeedback("成功获取所有节点信息！");
                 break;
             case "register":
                 try {
-                    result = registerIdentity(message, message.getIdentity(), message.getMappingData());
+                    result = registerIdentity(message);
                 } catch (Exception e) {
                     System.out.println("添加数据失败！");
                 }
                 break;
-            case "delete":
-                break;
-            case "modify":
-                break;
+//            case "delete":
+//                break;
+//            case "modify":
+//                break;
             case "resolve":
                 try {
-                    result = resolveIdentity(message, message.getIdentity());
+                    result = resolveIdentity(message);
                 } catch (Exception e) {
                     System.out.println("解析数据失败！");
                 }
@@ -592,25 +594,28 @@ public class NodeDHT implements Runnable {
     }
 
     // 获取所有节点信息
-    private static List<Node> getNodeList() {
-        return nodeList;
+    private static Node[] getNodeList() {
+        // 【注意】必须把List转换为数组才能序列化传输
+        Node[] nodes = new Node[nodeList.size()];
+        nodeList.toArray(nodes);
+        return nodes;
     }
 
-    private static Message registerIdentity(Message message, String identity, String mappingData) throws Exception {
-        int kid = HashFunc(identity);//标识的哈希
+    private static Message registerIdentity(Message message) throws Exception {
+        int kid = HashFunc(message.getIdentity());//标识的哈希
         Node targetNode = find_successor(kid);//应该存储的位置
         if (targetNode.getID() == me.getID()) {
             // v2增：判断标识是否已被注册
             if (ifExist("select * from node" + me.getID()
-                    + " where Identity='" + identity + "';")) {
+                    + " where Identity='" + message.getIdentity() + "';")) {
                 System.out.println("[系统提示]: 当前标识已被注册！");
                 message.setFeedback("该标识已被注册过！");
             } else {
                 // v2增：添加到本地节点数据库列表
                 registerData("insert into node" + me.getID() + "(Hash, Identity, Content)"
-                        + " values(" + kid + ", '" + identity + "', '" + mappingData + "');");
-                System.out.println("[系统提示]: 标识映射 " + identity + "->" + mappingData + " 已存入本地数据库");
-                message.setFeedback("标识 " + identity + " 注册成功！");
+                        + " values(" + kid + ", '" + message.getIdentity() + "', '" + message.getMappingData() + "');");
+                System.out.println("[系统提示]: 标识映射 " + message.getIdentity() + "->" + message.getMappingData() + " 已存入本地数据库");
+                message.setFeedback("标识 " + message.getIdentity() + " 注册成功！");
             }
             return message;
         } else {
@@ -619,13 +624,13 @@ public class NodeDHT implements Runnable {
             return receive_message;
         }
     }
-    private static Message resolveIdentity(Message message, String identity) throws Exception {
-        Node targetNode = find_successor(HashFunc(identity));
+    private static Message resolveIdentity(Message message) throws Exception {
+        Node targetNode = find_successor(HashFunc(message.getIdentity()));
         if (targetNode.getID() == me.getID()) {
             // v2增：从本地数据库获取内容，并将所有"#"替换为换行符
 //            System.out.println((resolveData("select *" + " from node" + me.getID() + " where Identity='" + identity + "';"))
 //                    .replaceAll("#", "\n"));
-            String result = resolveData("select *" + " from node" + me.getID() + " where Identity='" + identity + "';");
+            String result = resolveData("select *" + " from node" + me.getID() + " where Identity='" + message.getIdentity() + "';");
             if (!result.equals("")) {
                 message.setMappingData(result);
                 message.setFeedback("标识解析成功！");

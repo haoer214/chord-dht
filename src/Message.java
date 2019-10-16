@@ -1,6 +1,7 @@
 import java.io.Serializable;
 import java.util.List;
 
+// 【注意】控制组件 和 DHT节点 中的 Message类 所在的目录名必须 相同
 public class Message implements Serializable {
 
     // 节点配置标志位（ 1 为传输节点的初始化信息）
@@ -15,7 +16,7 @@ public class Message implements Serializable {
     // 映射数据
     private String mappingData;
     // dht节点信息
-    private List<Node> nodeList;
+    private Node[] nodeList;
     // 反馈信息
     private String feedback;
 
@@ -34,7 +35,7 @@ public class Message implements Serializable {
     public void setMappingData(String mappingData) {
         this.mappingData = mappingData;
     }
-    public void setNodeList(List<Node> nodeList) {
+    public void setNodeList(Node[] nodeList) {
         this.nodeList = nodeList;
     }
     public void setFeedback(String feedback){
@@ -56,7 +57,7 @@ public class Message implements Serializable {
     public String getMappingData(){
         return mappingData;
     }
-    public List<Node> getNodeList(){
+    public Node[] getNodeList(){
         return nodeList;
     }
     public String getFeedback(){
