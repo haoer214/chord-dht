@@ -5,13 +5,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.*;
-import java.util.Map.Entry;
 
 /* 
   新节点加入时需要知道一个已经在网络中的节点的IP和监听端口
 */
-public class NodeDHT implements Runnable 
-{
+public class NodeDHT implements Runnable {
 
     private int ID;
     private Socket connection;
@@ -26,15 +24,13 @@ public class NodeDHT implements Runnable
     private static String knownhostport;
     private static String myIP;
     private static String myport;
-    private static Vector<Node> nodeList = new Vector<Node>();
-    private static HashMap<Identification, String> IdentMap= new HashMap<Identification, String>();
+    private static List<Node> nodeList = new LinkedList<>();
     // v2增：连接mysql所需要的成员变量
     private static String driver;
     private static String url;
     private static String user;
     private static String pass;
     private static Connection conn;
-
 
     public NodeDHT(Socket s, int i) {
         this.connection = s;
@@ -64,13 +60,13 @@ public class NodeDHT implements Runnable
             pred=me;
             System.out.println("节点ID:"+me.getID() + "   前继节点ID:" +pred.getID());
 
-            Socket temp = null;
-            Runnable runnable = new NodeDHT(temp,0);
+            // '第一个节点加入'的线程
+            Runnable runnable = new NodeDHT(null,0);
             Thread thread = new Thread(runnable);
             thread.start();
             
             // v2改：监听键盘输入的线程
-            Runnable inputRunnable = new NodeDHT(temp,-2);
+            Runnable inputRunnable = new NodeDHT(null,-2);
             Thread inputThread = new Thread(inputRunnable);
             inputThread.start();
             
@@ -78,10 +74,10 @@ public class NodeDHT implements Runnable
             int port = Integer.parseInt(args[0]);
             try {
                    serverSocket = new ServerSocket( port );
-                } catch (IOException e) {
+            } catch (IOException e) {
                    System.out.println("[系统提示]:"+"无法监听端口 - " + port);
                    System.exit(-1);
-                }
+            }
             
             while (true) {
                    Socket newCon = serverSocket.accept();
@@ -106,19 +102,21 @@ public class NodeDHT implements Runnable
 
             int initInfo = getNodeInfo(myIP,myport);
             me = new Node(initInfo,myIP,myport);
-
-            String result=makeConnection(knownhostIP, knownhostport, "findPred/"+initInfo);
-            String[] tokens = result.split("/");
+            Message request = new Message();
+            request.setInitNode_flag(1);
+            request.setInitInfo("findPred/"+initInfo);
+            Message result = makeConnectionByObject(knownhostIP, knownhostport, request);
+            String[] tokens = result.getInitInfo().split("/");
             pred = new Node(Integer.parseInt(tokens[0]),tokens[1],tokens[2]);
             System.out.println("本节点 ID:"+me.getID() + "   前继节点 ID:" +pred.getID());
 
-            Socket temp = null;
-            Runnable runnable = new NodeDHT(temp,-1);
+            // '非第一个节点加入'的线程
+            Runnable runnable = new NodeDHT(null,-1);
             Thread thread = new Thread(runnable);
             thread.start();
             
             // v2改：监听键盘输入的线程
-            Runnable inputRunnable = new NodeDHT(temp,-2);
+            Runnable inputRunnable = new NodeDHT(null,-2);
             Thread inputThread = new Thread(inputRunnable);
             inputThread.start();
             
@@ -194,7 +192,8 @@ public class NodeDHT implements Runnable
             }
             
             return initInfo; 
-        } else {
+        }
+        else {
             return -1; 
         } 
     } 
@@ -205,9 +204,9 @@ public class NodeDHT implements Runnable
      * 这样的话，即便产生冲突，只需要已知节点重新计算即可，新节点仅需makeConnection一次
      */
     public static int getNodeInfo(String nodeIP, String nodePort) throws Exception{
-        if (busy == 0) { 
-            synchronized (object) { 
-                busy = 1; 
+        if (busy == 0) {
+            synchronized (object) {
+                busy = 1;
             }
             int nodeID;
             int initInfo =0;
@@ -221,28 +220,30 @@ public class NodeDHT implements Runnable
                 BigInteger hashNum = new BigInteger(1,hashBytes);
     
                 nodeID = Math.abs(hashNum.intValue()) % numDHT;
-    
-                while(Integer.parseInt(makeConnection(knownhostIP, knownhostport, "findSucOfPred/"+nodeID))==nodeID) {
+
+                Message request = new Message();
+                request.setInitNode_flag(1);
+                request.setInitInfo("findSucOfPred/"+nodeID);
+                while(Integer.parseInt(makeConnectionByObject(knownhostIP, knownhostport, request).getInitInfo())==nodeID) {
                     md.reset();
                     md.update(hashBytes);
                     hashBytes = md.digest();
                     hashNum = new BigInteger(1,hashBytes);
-                    nodeID = Math.abs(hashNum.intValue()) % numDHT;  
+                    nodeID = Math.abs(hashNum.intValue()) % numDHT;
+                    request.setInitInfo("findSucOfPred/"+nodeID);
                 }
-                
-                if (Integer.parseInt(makeConnection(knownhostIP, knownhostport, "findSucOfPred/"+nodeID))!=nodeID) {
-    
-                    System.out.println("新节点加入... ");
-                }
+
+                System.out.println("新节点加入... ");
     
                 initInfo = nodeID;
-    
+
             } catch (NoSuchAlgorithmException nsae){
                 nsae.printStackTrace();
             }
-            
-            return initInfo; 
-        } else {
+
+            return initInfo;
+        }
+        else {
             return -1; 
         } 
     } 
@@ -263,47 +264,25 @@ public class NodeDHT implements Runnable
            
         return KID;
     }
-    
-    public static String makeConnection(String ip, String port, String message) throws Exception {
-        if(myIP.equals(ip) && myport.equals(port)) {
-        	String response = considerInput(message);
-            return response;
-        }
-        else {
-        	 Socket sendingSocket = new Socket(ip,Integer.parseInt(port));
-             DataOutputStream out = new DataOutputStream(sendingSocket.getOutputStream());
-             BufferedReader inFromServer = new BufferedReader(new InputStreamReader(sendingSocket.getInputStream()));
-
-             // v2改：将.writeBytes(str)改为.write(str.getBytes()) --避免中文乱码
-             out.write((message + "\n").getBytes());
-
-             String result = inFromServer.readLine();
-
-             out.close();
-             inFromServer.close();
-             sendingSocket.close();
-             return result;
-        }
-    }
 
     // v2增：初始化jdbc连接信息，加载mysql驱动，建立Connection
     public static void initParam(String paramFile) throws Exception {
         Properties props = new Properties();
         props.load(new FileInputStream(new File(paramFile)));
-//        System.out.println("配置文件加载成功！");
+        System.out.println("配置文件加载成功！");
         // 通过.ini配置文件进行初始化
         driver = props.getProperty("driver");
         url = props.getProperty("url");
         user = props.getProperty("user");
         pass = props.getProperty("pass");
-//        System.out.println("配置信息初始化成功！");
+        System.out.println("配置信息初始化成功！");
 //        System.out.println("driver = " + driver);
 //        System.out.println("url = " + url);
 //        System.out.println("user = " + user);
 //        System.out.println("pass = " + pass);
         // 加载驱动
         Class.forName(driver);
-//        System.out.println("驱动加载成功！");
+        System.out.println("驱动加载成功！");
         // 建立连接
         conn = DriverManager.getConnection(url,user,pass);
         System.out.println("数据库连接建立成功！");
@@ -351,7 +330,7 @@ public class NodeDHT implements Runnable
         }
     }
     // v2增：添加数据 [Hash, Identity, Content]
-    public static int insertData(String sql) throws Exception {
+    public static int registerData(String sql) throws Exception {
         try(
                 Statement stmt = conn.createStatement())
         {
@@ -364,15 +343,17 @@ public class NodeDHT implements Runnable
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(sql))
         {
-            String result;
+            String result = "";
             if (rs.next()) {
-                result  = "<解析结果>: " + "#"
-                        + "【哈希】 " + rs.getInt(1) + "#"
-                        + "【标识】 " + rs.getString(2) + "#"
-                        + "【内容】 " + rs.getString(3) + "#";
-            } else {
-                result = "解析失败! 请确认标识是否输入正确 " + "#";
+//                result  = "<解析结果>: " + "#"
+//                        + "【哈希】 " + rs.getInt(1) + "#"
+//                        + "【标识】 " + rs.getString(2) + "#"
+//                        + "【内容】 " + rs.getString(3) + "#";
+                result = rs.getString(3);
             }
+//            else {
+//                result = "解析失败! 请确认标识是否输入正确 " + "#";
+//            }
             return result;
         }
     }
@@ -509,7 +490,7 @@ public class NodeDHT implements Runnable
             }
 
             try { 
-                    finishJoining(me.getID());
+                finishJoining(me.getID());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -546,74 +527,6 @@ public class NodeDHT implements Runnable
                 else if(str1.equals("printsuc")) {
                 	printSuccessor();
                 }
-                /*
-                 * 这里需要改一下insert的异常处理
-                 * 尽管第一个字符串是insert，但之后输入的字符串若不满足条件（比如个数不符合），就会阻塞线程
-                 * 可以考虑先输入一个insert，然后依次弹出输入标识、内容的提示，例如：
-                 * # insert
-                 * # 请输入标识：xx
-                 * # 请输入内容：xxx
-                 * #【系统提示：注册成功！】
-                 */
-                else if(str1.startsWith("insert")) {
-                	String fullIdent;
-                	String url;
-                	String[] tokens = str1.split("\\s+");
-                    fullIdent = tokens[1];
-                    url = tokens[2];
-					try {
-					    InsertIdentification(fullIdent, url);
-							//System.out.println(IdentMap.entrySet());
-					} catch (Exception e) {
-                        System.out.println("添加数据失败！" + "\n");
-                    }
-                }
-                /*
-                 * 问题同上，可考虑改为如下形式
-                 * # resolve
-                 * # 请输入标识：xx
-                 * # <解析结果>：
-                 * # ……
-                 */
-                else if(str1.startsWith("resolve")) {
-                	String fullIdent;
-                	String[] tokens = str1.split("\\s+");
-                	fullIdent=tokens[1];
-
-                    try {
-                        Node locNode = find_successor(HashFunc(fullIdent));
-                        if (locNode.getID() == me.getID()) {
-                            // v2增：从本地数据库获取内容，并将所有"#"替换为换行符
-                            System.out.println((resolveData("select *" + " from node" + me.getID() + " where Identity='" + fullIdent + "';"))
-                                    .replaceAll("#", "\n"));
-
-//                    		System.out.println("解析结果："+getUrl(fullIdent));
-//                    		System.out.println();
-                        } else {
-                            // v2增：从其他节点数据库获取内容，并将所有"#"替换为换行符
-                            System.out.println(makeConnection(locNode.getIP(), locNode.getPort(), "geturl/" + fullIdent)
-                                    .replaceAll("#", "\n"));
-//                    		System.out.println();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                /*
-                 * 若标识不存在，依旧会返回理应存储该标识的节点
-                 */
-                else if(str1.startsWith("find")) {
-                	String[] tokens = str1.split("\\s+");
-                	try {
-						System.out.println("[系统提示]: 此映射存储于节点"+find_successor((HashFunc(tokens[1]))).getID());
-						System.out.println();
-					} catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                else if(str1.startsWith("printident")){
-                	printIdent();
-                }
                 else {
                 	System.out.print("命令格式不正确！请重新输入");
                 }
@@ -621,22 +534,134 @@ public class NodeDHT implements Runnable
             scan.close();
             System.exit(0);
         }
-        else {//ID等于其他值时，进行的是信息交互的部分
-            try {
-                BufferedReader inFromClient =new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                DataOutputStream outToClient = new DataOutputStream(connection.getOutputStream());
+        else {
+            // ID等于其他值时，进行的是信息交互的部分
+            /* 对象序列化 */
+            try (
+                    // 【注意】对于Object IO流，要先创建输出流对象，再创建输入流对象，不然程序会死锁
+                    ObjectOutputStream outToControllerOrOtherNodes = new ObjectOutputStream(connection.getOutputStream());
+                    ObjectInputStream inFromControllerOrOtherNodes = new ObjectInputStream(connection.getInputStream()))
+            {
                 
-                String received = inFromClient.readLine();
-                String response = considerInput(received);
+                Message received_message = (Message)inFromControllerOrOtherNodes.readObject();
+                System.out.println(received_message.getInitNode_flag());
+                System.out.println(received_message.getInitInfo());
+                // 节点初始化配置指令
+                if (received_message.getInitNode_flag() == 1) {
+                    String response_initInfo = considerInput(received_message.getInitInfo());
+                    received_message.setInitInfo(response_initInfo);
+                    System.out.println(received_message.getInitInfo());
+                    outToControllerOrOtherNodes.writeObject(received_message);
 
-                // v2改：将.writeBytes(str)改为.write(str.getBytes()) --避免中文乱码
-                outToClient.write((response + "\n").getBytes());
-
+                } else {
+                    outToControllerOrOtherNodes.writeObject(considerType(received_message, received_message.getType()));
+                }
             } catch (Exception e) {
                 System.out.println("[系统提示]:"+"线程无法服务连接");
             	//e.printStackTrace();
             }
+        }
+    }
+    // 对于不同的操作类型，返回不同的 Message 对象
+    public static Message considerType(Message message, String type){
+        Message result = message;
+        switch (type) {
+            case "getNodeList":
+                result.setNodeList(getNodeList());
+                result.setFeedback("成功获取所有节点信息！");
+                break;
+            case "register":
+                try {
+                    result = registerIdentity(message, message.getIdentity(), message.getMappingData());
+                } catch (Exception e) {
+                    System.out.println("添加数据失败！");
+                }
+                break;
+            case "delete":
+                break;
+            case "modify":
+                break;
+            case "resolve":
+                try {
+                    result = resolveIdentity(message, message.getIdentity());
+                } catch (Exception e) {
+                    System.out.println("解析数据失败！");
+                }
+        }
+        return result;
+    }
 
+    // 获取所有节点信息
+    private static List<Node> getNodeList() {
+        return nodeList;
+    }
+
+    private static Message registerIdentity(Message message, String identity, String mappingData) throws Exception {
+        int kid = HashFunc(identity);//标识的哈希
+        Node targetNode = find_successor(kid);//应该存储的位置
+        if (targetNode.getID() == me.getID()) {
+            // v2增：判断标识是否已被注册
+            if (ifExist("select * from node" + me.getID()
+                    + " where Identity='" + identity + "';")) {
+                System.out.println("[系统提示]: 当前标识已被注册！");
+                message.setFeedback("该标识已被注册过！");
+            } else {
+                // v2增：添加到本地节点数据库列表
+                registerData("insert into node" + me.getID() + "(Hash, Identity, Content)"
+                        + " values(" + kid + ", '" + identity + "', '" + mappingData + "');");
+                System.out.println("[系统提示]: 标识映射 " + identity + "->" + mappingData + " 已存入本地数据库");
+                message.setFeedback("标识 " + identity + " 注册成功！");
+            }
+            return message;
+        } else {
+            Message receive_message = makeConnectionByObject(targetNode.getIP(), targetNode.getPort(), message);
+            System.out.println("[系统提示]: 标识映射已存入节点" + targetNode.getID());
+            return receive_message;
+        }
+    }
+    private static Message resolveIdentity(Message message, String identity) throws Exception {
+        Node targetNode = find_successor(HashFunc(identity));
+        if (targetNode.getID() == me.getID()) {
+            // v2增：从本地数据库获取内容，并将所有"#"替换为换行符
+//            System.out.println((resolveData("select *" + " from node" + me.getID() + " where Identity='" + identity + "';"))
+//                    .replaceAll("#", "\n"));
+            String result = resolveData("select *" + " from node" + me.getID() + " where Identity='" + identity + "';");
+            if (!result.equals("")) {
+                message.setMappingData(result);
+                message.setFeedback("标识解析成功！");
+            } else {
+                message.setFeedback("该标识不存在！");
+            }
+            return message;
+        } else {
+            // v2增：从其他节点数据库获取内容，并将所有"#"替换为换行符
+//            System.out.println(makeConnection(targetNode.getIP(), targetNode.getPort(), "geturl/" + identity)
+//                    .replaceAll("#", "\n"));
+            return makeConnectionByObject(targetNode.getIP(), targetNode.getPort(),message);
+        }
+    }
+
+    public static Message makeConnectionByObject(String ip, String port, Message message) throws Exception {
+        System.out.println(message.getInitNode_flag());
+        System.out.println(message.getInitInfo());
+        if (myIP.equals(ip) && myport.equals(port)) {
+            String response = considerInput(message.getInitInfo());
+            message.setInitInfo(response);
+            return message;
+        } else {
+            try(
+                    Socket sendingSocket = new Socket(ip,Integer.parseInt(port));
+                    // 【注意】对于Object IO流，要先创建输出流对象，再创建输入流对象，不然程序会死锁
+                    ObjectOutputStream outToControllerOrOtherNodes = new ObjectOutputStream(sendingSocket.getOutputStream());
+                    ObjectInputStream inFromControllerOrOtherNodes = new ObjectInputStream(sendingSocket.getInputStream()))
+            {
+                outToControllerOrOtherNodes.writeObject(message);
+
+                Message result = (Message)inFromControllerOrOtherNodes.readObject();
+
+                System.out.println(result.getInitInfo());
+                return result;
+            }
         }
     }
     
@@ -652,7 +677,10 @@ public class NodeDHT implements Runnable
     	    // v2增：数据迁移到后继节点
             transferAll("insert into node" + finger[1].getSuccessor().getID()
                     + " select * from node" + me.getID() + ";");
-    		makeConnection(finger[1].getSuccessor().getIP(), finger[1].getSuccessor().getPort(), "quitOfTwoNodes/");
+            Message request = new Message();
+            request.setInitNode_flag(1);
+            request.setInitInfo("quitOfTwoNodes/");
+    		makeConnectionByObject(finger[1].getSuccessor().getIP(), finger[1].getSuccessor().getPort(), request);
             // v2增：删除数据表
             deleteTable("drop table node" + me.getID() + ";");
             System.out.println("\n" + "已删除数据表【node" + me.getID() + "】");
@@ -662,22 +690,17 @@ public class NodeDHT implements Runnable
             // v2增：数据迁移到后继节点
             transferAll("insert into node" + finger[1].getSuccessor().getID()
                     + " select * from node" + me.getID() + ";");
-    		makeConnection(finger[1].getSuccessor().getIP(), finger[1].getSuccessor().getPort(), "quitOfManyNodes/"+pred.getID()+"/"+pred.getIP()+"/"+pred.getPort());
+            Message request = new Message();
+            request.setInitNode_flag(1);
+            request.setInitInfo("quitOfManyNodes/"+pred.getID()+"/"+pred.getIP()+"/"+pred.getPort());
+    		makeConnectionByObject(finger[1].getSuccessor().getIP(), finger[1].getSuccessor().getPort(), request);
             // v2增：删除数据表
             deleteTable("drop table node" + me.getID() + ";");
             System.out.println("\n" + "已删除数据表【node" + me.getID() + "】");
             System.out.println("[系统提示]: 节点 "+me.getID()+"已经退出DHT网络");
     	}
     }
-    
-    public static void quit_update_finger_table(Node s, int exitID){
-        for(int i = 1; i <= m; i++){
-            if (finger[i].getSuccessor().getID() == exitID){
-                finger[i].setSuccessor(s);
-            }
-        }
-    }
-    
+
     public static String considerInput(String received) throws Exception {
         String[] tokens = received.split("/");
         String outResponse = "";
@@ -725,25 +748,12 @@ public class NodeDHT implements Runnable
         }
         //新添加
         else if (tokens[0].equals("deleteNodeOfNodelist")) {
-        	Node deletenode = new Node(Integer.parseInt(tokens[1]),tokens[2],tokens[3]);
-        	Node updatenode = new Node(Integer.parseInt(tokens[4]),tokens[5],tokens[6]);
-        	delete(deletenode);
-        	quit_update_finger_table(updatenode,Integer.parseInt(tokens[7]));
+        	Node deleteNode = new Node(Integer.parseInt(tokens[1]),tokens[2],tokens[3]);
+        	Node updateNode = new Node(Integer.parseInt(tokens[4]),tokens[5],tokens[6]);
+        	delete(deleteNode);
+        	quit_update_finger_table(updateNode,Integer.parseInt(tokens[7]));
         	System.out.println("\n"+"[系统提示]: 节点 "+tokens[7]+"已经退出DHT网络");
             printNum();
-        }
-        //新添加
-        else if (tokens[0].equals("tryInsert")) {
-            // v2改：新增两个参数tokens[1]、tokens[2]
-            tryInsert(Integer.parseInt(tokens[1]), tokens[2], tokens[3],tokens[4]);
-        }
-        else if (tokens[0].equals("geturl")) {
-            // v2增：从本地数据库提取标识内容
-            outResponse = resolveData("select *"
-                    + " from node" + me.getID()
-                    + " where Identity='" + tokens[1] + "/" + tokens[2] + "';");
-
-//            outResponse=getUrl(tokens[1]+"/"+tokens[2]);
         }
         //新添加
         else if (tokens[0].equals("printNum")) {
@@ -755,16 +765,16 @@ public class NodeDHT implements Runnable
         }
         //新添加
         else if (tokens[0].equals("findSucOfPred")) {
-        	outResponse=Integer.toString(find_successor(find_predecessor(Integer.parseInt(tokens[1])).getID()).getID());
+            outResponse = Integer.toString(find_successor(find_predecessor(Integer.parseInt(tokens[1])).getID()).getID());
         }
         //新添加
         else if (tokens[0].equals("load")) {
-        	outResponse=loadNode();
+            outResponse = loadNode();
         }
         //新添加
         else if (tokens[0].equals("updateList")) {
-        	Node newnode = new Node(Integer.parseInt(tokens[1]),tokens[2],tokens[3]);
-        	updateList(newnode);
+        	Node newNode = new Node(Integer.parseInt(tokens[1]),tokens[2],tokens[3]);
+        	updateList(newNode);
         }
         else if (tokens[0].equals("closetPred")) {
             Node newNode = closet_preceding_finger(Integer.parseInt(tokens[1]));
@@ -777,98 +787,26 @@ public class NodeDHT implements Runnable
         }
         return outResponse;
     }
-    //查找url
-    // v2改：暂时先注释掉哈
-//    public static String getUrl(String fullIdent){
-//    	String[] tokens = fullIdent.split("/");
-//    	String top=tokens[0];
-//    	String second=tokens[1];
-//    	Identification dest=new Identification(top, second);
-//    	if(IdentMap.containsKey(dest))
-//    	    return IdentMap.get(dest);
-//    	else {
-//    		return "无法解析";
-//    	}
-//    }
-    //向当前节点插入<Identification,url>键值对
-    public static void InsertIdentification(String fullIdent, String url) throws Exception {
-    	String[] tokens = fullIdent.split("/");
-    	String top=tokens[0];
-    	String second=tokens[1];
-    	int kid=HashFunc(fullIdent);//标识的哈希
-    	Node temp=find_successor(kid);//应该存储的位置
-        if (temp.getID() == me.getID()) {
-            // v2增：判断标识是否已被注册
-            if (ifExist("select * from node" + me.getID()
-                    + " where Identity='" + fullIdent + "';")) {
-                System.out.println("[系统提示]: 当前标识已被注册！");
-                System.out.println();
-            } else {
-                // v2增：添加到本地节点数据库列表
-                insertData("insert into node" + me.getID() + "(Hash, Identity, Content)"
-                        + " values(" + kid + ", '" + fullIdent + "', '" + url + "');");
-                System.out.println("[系统提示]: 标识映射 " + fullIdent + "->" + url + " 已存入本地数据库");
-                System.out.println();
 
-                localInsert(top, second, url);
-            }
-
-        } else {
-            makeConnection(temp.getIP(), temp.getPort(), "tryInsert/" + kid + "/" + top + "/" + second + "/" + url);
-            System.out.println("[系统提示]: 标识映射已存入节点" + temp.getID());
-            System.out.println();
-        }
-    }
-    //新增：将标识映射添加到本地
-    public static void localInsert(String top ,String second,String url) {
-    	Identification newone= new Identification(top, second); 
-    	//IdentificationList.add(newone);
-    	//System.out.println(newone.getToplevelIdent()+"/"+newone.getSecondaryIdent());
-    	IdentMap.put(newone, url);
-    	//v2改：暂时先注释掉哈
-//		System.out.println("[系统提示]: 标识映射已存入节点"+me.getID());
-//		System.out.println();
-    }
-    //新增：将标识映射添加到其它节点
-    // v2改：添加形参kid，并声明抛出异常
-    public static void tryInsert(int kid, String top,String second ,String url) throws Exception {
-        // v2增：判断标识是否已被注册
-        if (ifExist("select * from node" + me.getID()
-                + " where Identity='" + top + "/" + second + "';")) {
-            System.out.println("[系统提示]: 当前标识已被注册！");
-            System.out.println();
-        } else {
-            // v2增：添加到该节点数据库列表
-            insertData("insert into node" + me.getID() + "(Hash, Identity, Content)"
-                    + " values(" + kid + ", '" + top + "/" + second + "', '" + url + "');");
-            System.out.println("[系统提示]: 有新标识映射存入本节点");
-            System.out.println("[系统提示]: 标识映射 " + top + "/" + second + "->" + url + " 已存入本地数据库");
-            System.out.println();
-
-            Identification newone= new Identification(top, second);
-            IdentMap.put(newone, url);
-            //v2改：暂时先注释掉哈
-//    	System.out.println(newone.getToplevelIdent()+"/"+newone.getSecondaryIdent()+"="+IdentMap.get(newone));
-//    	System.out.println();
-        }
-    }
     //初始化路由表
     public static void init_finger_table(Node n) throws Exception {
         int myID, nextID;
 
-        String request = "findSuc/" + finger[1].getStart();
-        String result = makeConnection(n.getIP(),n.getPort(),request);
+        Message request = new Message();
+        request.setInitNode_flag(1);
+        request.setInitInfo("findSuc/" + finger[1].getStart());
+        Message result = makeConnectionByObject(n.getIP(),n.getPort(),request);
 
-        String[] tokens = result.split("/");
+        String[] tokens = result.getInitInfo().split("/");
         finger[1].setSuccessor(new Node(Integer.parseInt(tokens[0]),tokens[1],tokens[2]));
         
-        String request2 = "getPred";
-        String result2 = makeConnection(finger[1].getSuccessor().getIP(),finger[1].getSuccessor().getPort(),request2);
-        String[] tokens2 = result2.split("/");
+        request.setInitInfo("getPred");
+        Message result2 = makeConnectionByObject(finger[1].getSuccessor().getIP(),finger[1].getSuccessor().getPort(),request);
+        String[] tokens2 = result2.getInitInfo().split("/");
         pred = new Node(Integer.parseInt(tokens2[0]),tokens2[1],tokens2[2]);
 
-        String request3 = "setPred/" + me.getID() + "/" + me.getIP() + "/" + me.getPort();
-        makeConnection(finger[1].getSuccessor().getIP(),finger[1].getSuccessor().getPort(),request3);
+        request.setInitInfo("setPred/" + me.getID() + "/" + me.getIP() + "/" + me.getPort());
+        makeConnectionByObject(finger[1].getSuccessor().getIP(),finger[1].getSuccessor().getPort(),request);
 
         int normalInterval = 1;
         for (int i = 1; i <= m-1; i++) {
@@ -886,9 +824,9 @@ public class NodeDHT implements Runnable
                 finger[i+1].setSuccessor(finger[i].getSuccessor());
             } else {
 
-                String request4 = "findSuc/" + finger[i+1].getStart();
-                String result4 = makeConnection(n.getIP(),n.getPort(),request4);
-                String[] tokens4 = result4.split("/");
+                request.setInitInfo("findSuc/" + finger[i+1].getStart());
+                Message result4 = makeConnectionByObject(n.getIP(),n.getPort(),request);
+                String[] tokens4 = result4.getInitInfo().split("/");
 
                 int fiStart = finger[i+1].getStart();
                 int succ = Integer.parseInt(tokens4[0]); 
@@ -914,8 +852,10 @@ public class NodeDHT implements Runnable
 
             p = find_predecessor(id);
 
-            String request = "updateFing/" + me.getID() + "/" + me.getIP() + "/" + me.getPort() + "/" + i;  
-            makeConnection(p.getIP(),p.getPort(),request);
+            Message request = new Message();
+            request.setInitNode_flag(1);
+            request.setInitInfo("updateFing/" + me.getID() + "/" + me.getIP() + "/" + me.getPort() + "/" + i);
+            makeConnectionByObject(p.getIP(),p.getPort(),request);
         }
     }
     //更新路由表
@@ -936,10 +876,21 @@ public class NodeDHT implements Runnable
                    finger[i].setSuccessor(s);
                    p = pred;
 
-                   String request = "updateFing/" + s.getID() + "/" + s.getIP() + "/" + s.getPort() + "/" + i;  
-                   makeConnection(p.getIP(),p.getPort(),request);
-                   }
+                   Message request = new Message();
+                   request.setInitNode_flag(1);
+                   request.setInitInfo("updateFing/" + s.getID() + "/" + s.getIP() + "/" + s.getPort() + "/" + i);
+                   makeConnectionByObject(p.getIP(),p.getPort(),request);
+               }
     }
+
+    public static void quit_update_finger_table(Node s, int exitID){
+        for(int i = 1; i <= m; i++){
+            if (finger[i].getSuccessor().getID() == exitID){
+                finger[i].setSuccessor(s);
+            }
+        }
+    }
+
     //设置当前节点的前继节点
     public static void setPredecessor(Node n) // throws RemoteException
     {
@@ -951,16 +902,15 @@ public class NodeDHT implements Runnable
         return pred;
     }
     //通过当前节点的路由表查询某个NID的后继节点
-    public static Node find_successor(int id) throws Exception 
-           { 
-               Node n;
-               n = find_predecessor(id);
+    public static Node find_successor(int id) throws Exception {
+        Node n = find_predecessor(id);
 
-               String request = "getSuc/" ;
-               String result = makeConnection(n.getIP(),n.getPort(),request);
-               String[] tokens = result.split("/");
-               Node tempNode = new Node(Integer.parseInt(tokens[0]),tokens[1],tokens[2]);
-               return tempNode;
+        Message request = new Message();
+        request.setInitNode_flag(1);
+        request.setInitInfo("getSuc/");
+        Message result = makeConnectionByObject(n.getIP(),n.getPort(),request);
+        String[] tokens = result.getInitInfo().split("/");
+        return new Node(Integer.parseInt(tokens[0]),tokens[1],tokens[2]);
     }
     //通过当前节点的路由表查询某个NID的前继节点
     public static Node find_predecessor(int id)  throws Exception
@@ -975,24 +925,27 @@ public class NodeDHT implements Runnable
         while ((normalInterval==1 && (id <= myID || id > succID)) ||
                 (normalInterval==0 && (id <= myID && id > succID))) {
 
-            String request = "closetPred/" + id ;
-            String result = makeConnection(n.getIP(),n.getPort(),request);
-            String[] tokens = result.split("/");
+            Message request = new Message();
+            request.setInitNode_flag(1);
+            request.setInitInfo("closetPred/" + id);
+            Message result = makeConnectionByObject(n.getIP(),n.getPort(),request);
+            String[] tokens = result.getInitInfo().split("/");
 
             n = new Node(Integer.parseInt(tokens[0]),tokens[1],tokens[2]);
 
             myID = n.getID();
 
-            String request2 = "getSuc/" ;
-            String result2 = makeConnection(n.getIP(),n.getPort(),request2);
-            String[] tokens2 = result2.split("/");
+            request.setInitInfo("getSuc/");
+            Message result2 = makeConnectionByObject(n.getIP(),n.getPort(),request);
+            String[] tokens2 = result2.getInitInfo().split("/");
 
             succID = Integer.parseInt(tokens2[0]);
 
-            if (myID >= succID) 
+            if (myID >= succID)
                 normalInterval = 0;
-            else normalInterval = 1;
-                }
+            else
+                normalInterval = 1;
+        }
         return n;
     }
     //获取当前节点的后继节点
@@ -1031,82 +984,58 @@ public class NodeDHT implements Runnable
     }
     //新增：更新其它节点的nodeList
     public synchronized static void updateOthersList() throws Exception {
-    	Iterator<Node> iterator = nodeList.iterator();
+        Message request = new Message();
+        request.setInitNode_flag(1);
+        request.setInitInfo("updateList/"+me.getID()+"/"+me.getIP()+"/"+me.getPort());
+        Iterator<Node> iterator = nodeList.iterator();
     	while(iterator.hasNext()) {
-    		Node node =iterator.next();
-    		if(node==me)
-    			continue;
-    	    makeConnection(node.getIP(),node.getPort(),"updateList/"+me.getID()+"/"+me.getIP()+"/"+me.getPort());
+    		Node node = iterator.next();
+            if (node == me) {
+                continue;
+            }
+    	    makeConnectionByObject(node.getIP(),node.getPort(),request);
     	}
     }
     public synchronized static void buildNodeList() throws Exception{
     	add(me);
-    	String str = makeConnection(knownhostIP, knownhostport, "load/");
-    	getNode(str);
+    	Message request = new Message();
+    	request.setInitNode_flag(1);
+    	request.setInitInfo("load/");
+    	Message result = makeConnectionByObject(knownhostIP, knownhostport, request);
+    	getNode(result.getInitInfo());
     }
-    //新增：节点生成nodeList
-    /*public static void buildNodeList() throws Exception{
-    	addLocalNode();
-    	Node current=new Node(finger[m].getSuccessor().getID(),finger[m].getSuccessor().getIP(), finger[m].getSuccessor().getPort());
-    	while(!nodeList.contains(me)) {
-    		getNode(makeConnection(current.getIP(),current.getPort(), "addLocalNode/"));
-    		String str=makeConnection(current.getIP(), current.getPort(), "remoteNode/");
-    		String[] tokens = str.split("/");
-    		current=new Node(Integer.parseInt(tokens[0]),tokens[1],tokens[2]);
-    	}
-    	System.out.println("执行到此----");
-    }*/
-    //新增：处理返回的m个node信息并生成arraylist(路由表中最多只有m个node)
+
+    //新增：处理返回的m个node信息并生成list(路由表中最多只有m个node)
     public synchronized static void getNode(String str) {
     	 String[] tokens = str.split("/");
-    	 Node newNode=null;
-    	 for(int i=1;i<=(tokens.length/3);i++) {
-    	      newNode=new Node(Integer.parseInt(tokens[0+3*(i-1)]),tokens[1+3*(i-1)],tokens[2+3*(i-1)]);
-    	      add(newNode);
-    	 }
+    	 Node newNode;
+        for (int i = 1; i <= (tokens.length / 3); i++) {
+            newNode = new Node(Integer.parseInt(tokens[3 * (i - 1)]), tokens[1 + 3 * (i - 1)], tokens[2 + 3 * (i - 1)]);
+            add(newNode);
+        }
     }
-    //新增：将本节点的路由表信息中的节点信息加入nodeList    
-    /*public static void addLocalNode(){
-    	for(int i=1;i<=m;i++){
-            nodeList.add(finger[i].getSuccessor());
-         }
-    }*/
+
     public synchronized static String loadNode(){
-	     Node node =null;
+	     Node node;
 	     String results="";
-	     for(int i=0;i<nodeList.size()-1;i++) {
-	    	  node = nodeList.get(i);
-		      results=results+node.getID() + "/" + node.getIP() + "/" + node.getPort()+"/";
-	     }
-	     results=results+nodeList.get(nodeList.size()-1).getID() + "/" + nodeList.get(nodeList.size()-1).getIP() + "/" + nodeList.get(nodeList.size()-1).getPort()+"/";
+         for (int i = 0; i < nodeList.size() - 1; i++) {
+             node = nodeList.get(i);
+             results = results + node.getID() + "/" + node.getIP() + "/" + node.getPort() + "/";
+         }
+	     results = results + nodeList.get(nodeList.size() - 1).getID() + "/" + nodeList.get(nodeList.size() - 1).getIP() + "/" + nodeList.get(nodeList.size() - 1).getPort() + "/";
 	     return results;
     }
-    //新增：提供本节点的路由表中的节点信息给其它节点
-    /*public static String loadNode(){
-    	Node newNode =null;
-    	String results="";
-    	for(int i=1;i<m;i++) {
-    		newNode=finger[i].getSuccessor();
-    		results=results+newNode.getID() + "/" + newNode.getIP() + "/" + newNode.getPort()+"/" ;
-    	}
-    	newNode=finger[m].getSuccessor();
-    	results=results+newNode.getID() + "/" + newNode.getIP() + "/" + newNode.getPort();
-    	return results;
-    }*/
-    //新增：返回路由表中最远的节点
-   /* public static String remoteNode(){
-    	String result = null;
-    	result =finger[m].getSuccessor().getID()+"/"+finger[m].getSuccessor().getIP()+"/"+finger[m].getSuccessor().getPort();
-    	return result;
-    }*/
     //新增：广播消息
     public synchronized static void noticeOthers(String message) throws Exception{
+        Message request = new Message();
+        request.setInitNode_flag(1);
+        request.setInitInfo(message);
     	Iterator<Node> iterator = nodeList.iterator();
     	while(iterator.hasNext()) {
     		Node node =iterator.next();
     		if(node==me)
     			continue;
-    		makeConnection(node.getIP(),node.getPort(),message);
+    		makeConnectionByObject(node.getIP(),node.getPort(),request);
     	}
     	System.out.println("已通知所有节点");
     }
@@ -1136,7 +1065,7 @@ public class NodeDHT implements Runnable
     //新增：打印节点信息
     public synchronized static void printNodeInfo() throws Exception{
     	Iterator<Node> iterator = nodeList.iterator();
-    	String string="";
+    	String string;
     	System.out.println("*****节点列表*****");
     	if(nodeList.size()==0)
     		System.out.println("列表为空！");
@@ -1147,24 +1076,6 @@ public class NodeDHT implements Runnable
     	}
     	System.out.println();
     }
-    //新增：打印映射
-    public static void printIdent() {
-        /*
-         * 是不是可以改为Set<Identification> ms = IdentMap.keySet();
-        for (Identification key : ms) {
-			System.out.println((count++)+"."+key.getToplevelIdent()+"/"+key.getSecondaryIdent()+"="+IdentMap.get(key));
-		}
-         */
-    	Set<Entry<Identification,String>> ms =IdentMap.entrySet();
-    	System.out.println("******标识映射*****");
-    	int count=1;
-		for (Entry<Identification,String> entry : ms) {
-			System.out.println((count++)+"."+entry.getKey().getToplevelIdent()+"/"+entry.getKey().getSecondaryIdent()+"="+entry.getValue());
-		}
-		System.out.println();
-    } 
-    //新增
-    
     //新增：删除节点
     public synchronized static void delete(Node node){
     	nodeList.remove(node);
