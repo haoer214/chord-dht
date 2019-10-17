@@ -1,3 +1,5 @@
+package bupt.fnl.dht.node;
+
 public class FingerTable{
 
 	private int start;

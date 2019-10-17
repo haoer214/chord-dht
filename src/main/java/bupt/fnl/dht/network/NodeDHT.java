@@ -1,3 +1,9 @@
+package bupt.fnl.dht.network;
+
+import bupt.fnl.dht.node.FingerTable;
+import bupt.fnl.dht.utils.Message;
+import bupt.fnl.dht.node.Node;
+
 import java.io.*;
 import java.math.BigInteger;
 import java.net.*;
@@ -19,7 +25,7 @@ public class NodeDHT implements Runnable {
     private static int numDHT;
     private static int busy;
     private static Object object = new Object();
-    private static FingerTable[] finger;    
+    private static FingerTable[] finger;
     private static String knownhostIP;
     private static String knownhostport;
     private static String myIP;
@@ -138,9 +144,9 @@ public class NodeDHT implements Runnable {
         }
         else
         {
-            System.out.println("Syntax one - NodeDHT-First [LocalPortnumber] [numNodes]");
-            System.out.println("Syntax two - NodeDHT-other [Known-HostIP]  [Known-HostPortnumber] [LocalPortnumber] [numNodes]");
-            System.out.println("         *** [LocaPortNumber] = is the port number which the Node will be listening waiting for connections.");
+            System.out.println("Syntax one - main.java.bupt.fnl.dht.network.NodeDHT-First [LocalPortnumber] [numNodes]");
+            System.out.println("Syntax two - main.java.bupt.fnl.dht.network.NodeDHT-other [Known-HostIP]  [Known-HostPortnumber] [LocalPortnumber] [numNodes]");
+            System.out.println("         *** [LocaPortNumber] = is the port number which the main.java.bupt.fnl.dht.node.Node will be listening waiting for connections.");
             System.out.println("         *** [Known-HostName] = is the hostIP of one DHTNode already in the net.");
             System.out.println("         *** [Known-HostPortnumber] = is the port which the Known-Host listening waiting for connections.");
             System.exit(1);
@@ -543,10 +549,9 @@ public class NodeDHT implements Runnable {
                     ObjectOutputStream outToControllerOrOtherNodes = new ObjectOutputStream(connection.getOutputStream());
                     ObjectInputStream inFromControllerOrOtherNodes = new ObjectInputStream(connection.getInputStream()))
             {
-                System.out.println("尝试读取对象...");
+
                 Message received_message = (Message)inFromControllerOrOtherNodes.readObject();
-                System.out.println(received_message.getInitNode_flag());
-                System.out.println(received_message.getInitInfo());
+
                 // 节点初始化配置指令
                 if (received_message.getInitNode_flag() == 1) {
                     String response_initInfo = considerInput(received_message.getInitInfo());
@@ -565,7 +570,6 @@ public class NodeDHT implements Runnable {
     }
     // 对于不同的操作类型，返回不同的 Message 对象
     public static Message considerType(Message message){
-        System.out.println(message.getType());
         Message result = message;
         switch (message.getType()) {
             case "getNodeList":

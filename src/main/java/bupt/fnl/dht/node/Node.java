@@ -1,3 +1,5 @@
+package bupt.fnl.dht.node;
+
 import java.io.Serializable;
 
 // 【注意】Node必须实现序列化接口
