@@ -7,7 +7,7 @@ import java.io.Serializable;
 // 【注意】控制组件 和 DHT节点 中的 Message类 所在的目录名必须 相同
 public class Message implements Serializable {
 
-    // 节点配置标志位（ 设置为 1 则是传输节点的初始化信息）
+    // 节点配置标志位（设置为 1 则是传输节点的初始化信息）
     private int initNode_flag;
     // 节点配置信息
     private String initInfo;
