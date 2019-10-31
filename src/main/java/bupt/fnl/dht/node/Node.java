@@ -1,4 +1,9 @@
-public class Node {
+package bupt.fnl.dht.node;
+
+import java.io.Serializable;
+
+// 【注意】Node必须实现序列化接口
+public class Node implements Serializable {
 	private int myID;
 	private String myIP;
 	private String myPort;
