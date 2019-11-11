@@ -272,10 +272,6 @@ public class NodeDHT implements Runnable {
         String user = props.getProperty("user");
         String pass = props.getProperty("pass");
         System.out.println("配置信息初始化成功！");
-//        System.out.println("driver = " + driver);
-//        System.out.println("url = " + url);
-//        System.out.println("user = " + user);
-//        System.out.println("pass = " + pass);
         // 加载驱动
         Class.forName(driver);
         System.out.println("驱动加载成功！");
@@ -364,6 +360,29 @@ public class NodeDHT implements Runnable {
             pstmt.setInt(2, hash);
             pstmt.setString(3, identity);
             pstmt.setString(4, content);
+            pstmt.executeUpdate();
+        }
+    }
+    // 删除数据 [Hash, Identity, Content]
+    public static void deleteData(int nodeID, String identity) throws Exception {
+        try(
+                PreparedStatement pstmt = conn.prepareStatement(
+                        "delete from node? where Identity=?;"))
+        {
+            pstmt.setInt(1, nodeID);
+            pstmt.setString(2, identity);
+            pstmt.executeUpdate();
+        }
+    }
+    // 更新数据 [Hash, Identity, Content]
+    public static void updateData(int nodeID, String identity, String content) throws Exception {
+        try(
+                PreparedStatement pstmt = conn.prepareStatement(
+                        "update node? set Content=? where Identity=?;"))
+        {
+            pstmt.setInt(1, nodeID);
+            pstmt.setString(2, content);
+            pstmt.setString(3, identity);
             pstmt.executeUpdate();
         }
     }
@@ -596,18 +615,28 @@ public class NodeDHT implements Runnable {
                 try {
                     result = registerIdentity(message);
                 } catch (Exception e) {
-                    System.out.println("添加数据失败！");
+                    System.out.println("注册失败！");
                 }
                 break;
-//            case "delete":
-//                break;
-//            case "modify":
-//                break;
+            case "delete":
+                try {
+                    result = deleteIdentity(message);
+                } catch (Exception e) {
+                    System.out.println("删除失败！");
+                }
+                break;
+            case "update":
+                try {
+                    result = updateIdentity(message);
+                } catch (Exception e) {
+                    System.out.println("更新失败！");
+                }
+                break;
             case "resolve":
                 try {
                     result = resolveIdentity(message);
                 } catch (Exception e) {
-                    System.out.println("解析数据失败！");
+                    System.out.println("解析失败！");
                 }
         }
         return result;
@@ -621,6 +650,7 @@ public class NodeDHT implements Runnable {
         return nodes;
     }
 
+    /* 增 */
     private static Message registerIdentity(Message message) throws Exception {
         System.out.println("[系统提示]: 有新标识 "+message.getIdentity()+" 请求注册...");
         int kid = HashFunc(message.getIdentity());//标识的哈希
@@ -642,6 +672,51 @@ public class NodeDHT implements Runnable {
             return makeConnectionByObject(targetNode.getIP(), targetNode.getPort(), message);
         }
     }
+    /* 删 */
+    private static Message deleteIdentity(Message message) throws Exception {
+        System.out.println("[系统提示]: 收到标识 "+message.getIdentity()+" 的删除请求...");
+        int kid = HashFunc(message.getIdentity());//标识的哈希
+        Node targetNode = find_successor(kid);//应该存储的位置
+        if (targetNode.getID() == me.getID()) {
+            // 判断预删除标识是否存在
+            if (!ifExist(me.getID(), message.getIdentity())) {
+                System.out.println("该标识还未注册，无法删除！");
+                message.setFeedback("该标识还未注册，无法删除！");
+            } else {
+                // 删除标识及映射数据
+                deleteData(me.getID(), message.getIdentity());
+                System.out.println("标识 " + message.getIdentity() + " 删除成功！");
+                message.setFeedback("标识 " + message.getIdentity() + " 删除成功！");
+            }
+            return message;
+        } else {
+            System.out.println("删除请求已经转发至节点 " + targetNode.getID());
+            return makeConnectionByObject(targetNode.getIP(), targetNode.getPort(), message);
+        }
+    }
+    /* 改 */
+    private static Message updateIdentity(Message message) throws Exception {
+        System.out.println("[系统提示]: 标识 "+message.getIdentity()+" 请求更新映射数据...");
+        int kid = HashFunc(message.getIdentity());//标识的哈希
+        Node targetNode = find_successor(kid);//应该存储的位置
+        if (targetNode.getID() == me.getID()) {
+            // 判断标识是否已被注册
+            if (!ifExist(me.getID(), message.getIdentity())) {
+                System.out.println("该标识还未注册，无法更新！");
+                message.setFeedback("该标识还未注册，无法更新！");
+            } else {
+                // 更新本地节点数据库列表
+                updateData(me.getID(), message.getIdentity(), message.getMappingData());
+                System.out.println("标识映射 " + message.getIdentity() + "->" + message.getMappingData() + " 已更新至本地数据库");
+                message.setFeedback("标识 " + message.getIdentity() + " 更新映射数据成功！");
+            }
+            return message;
+        } else {
+            System.out.println("更新请求已经转发至节点 " + targetNode.getID());
+            return makeConnectionByObject(targetNode.getIP(), targetNode.getPort(), message);
+        }
+    }
+    /* 查 */
     private static Message resolveIdentity(Message message) throws Exception {
         System.out.println("[系统提示]: 收到标识 "+message.getIdentity()+" 的解析请求...");
         Node targetNode = find_successor(HashFunc(message.getIdentity()));
