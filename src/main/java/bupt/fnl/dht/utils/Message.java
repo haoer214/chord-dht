@@ -12,8 +12,15 @@ public class Message implements Serializable {
     // 节点配置信息
     private String initInfo;
 
-    // 五种类型：getNodeList, register, delete, modify, resolve
-    private String type;
+    // 发送者前缀
+    private String orgName;
+    // 私钥加密后的信息
+    private String cipherText;
+    // 公钥解密后的信息
+    private String plainText;
+
+    // 五种类型：getNodeList, register, delete, update, resolve
+    private int type;
     // 标识
     private String identity;
     // 映射数据
@@ -23,13 +30,14 @@ public class Message implements Serializable {
     // 反馈信息
     private String feedback;
 
+
     public void setInitNode_flag(int initNode_flag){
         this.initNode_flag = initNode_flag;
     }
     public void setInitInfo(String initInfo){
         this.initInfo = initInfo;
     }
-    public void setType(String type) {
+    public void setType(int type) {
         this.type = type;
     }
     public void setIdentity(String identity) {
@@ -51,7 +59,7 @@ public class Message implements Serializable {
     public String getInitInfo(){
         return initInfo;
     }
-    public String getType(){
+    public int getType(){
         return type;
     }
     public String getIdentity(){
@@ -67,4 +75,22 @@ public class Message implements Serializable {
         return feedback;
     }
 
+    public String getCipherText() {
+        return cipherText;
+    }
+    public void setCipherText(String cipherText) {
+        this.cipherText = cipherText;
+    }
+    public String getPlainText() {
+        return plainText;
+    }
+    public void setPlainText(String plainText) {
+        this.plainText = plainText;
+    }
+    public String getOrgName() {
+        return orgName;
+    }
+    public void setOrgName(String orgName) {
+        this.orgName = orgName;
+    }
 }
