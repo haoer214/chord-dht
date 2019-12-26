@@ -29,7 +29,7 @@ public class Communication {
         else {
             // 查询区块链里是否存有发送者的前缀
             String orgName = received_message.getOrgName();
-            JSONArray jsonArrayFromBlockchain = new QueryAuthority().query(orgName);
+            JSONArray jsonArrayFromBlockchain = QueryAuthority.query(orgName);
             if (jsonArrayFromBlockchain == null || jsonArrayFromBlockchain.isEmpty()) {
                 response_message.setFeedback("该企业未注册，没有操作权限！");
                 System.out.println("该企业未注册，没有操作权限！");
@@ -226,7 +226,7 @@ public class Communication {
                 message.setFeedback("该标识不存在！");
             } else {
                 System.out.println("标识解析成功！正在进行防篡改校验...");
-                String mappingDataHash = new QueryHash().query(identity);
+                String mappingDataHash = QueryHash.query(identity);
                 if (digest(result).equals(mappingDataHash)) {
                     System.out.println("经验证，解析结果未被篡改");
                     // message写入解析结果
