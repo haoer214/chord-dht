@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--mapper标签的namespace属性必须是dao接口的全限定域名-->
+<mapper namespace="bupt.fnl.dht.dao.IdentityDao">
+    <update id="createTable" parameterType="bupt.fnl.dht.domain.NodeVo">
+        create table #{curNode}(hash int, identifier varchar(255) primary key, mappingData text)
+    </update>
+    <insert id="transferPart" parameterType="bupt.fnl.dht.domain.NodeVo">
+        insert into #{curNode} select * from #{sucNode} where hash&lt;=#{curHash} and hash>#{sucHash}
+    </insert>
+    <delete id="deletePart" parameterType="bupt.fnl.dht.domain.NodeVo">
+        delete from #{sucNode} where hash&lt;=#{curHash} and hash>#{sucHash}
+    </delete>
+    <insert id="transferAll" parameterType="bupt.fnl.dht.domain.NodeVo">
+        insert into #{sucNode} select * from #{curNode}
+    </insert>
+    <update id="deleteTable" parameterType="bupt.fnl.dht.domain.NodeVo">
+        drop table #{curNode}
+    </update>
+    <insert id="saveData" parameterType="bupt.fnl.dht.domain.NodeVo">
+        insert into #{curNode}(hash, identifier, mappingData) values(#{hash},#{identifier},#{mappingData})
+    </insert>
+    <delete id="deleteData" parameterType="bupt.fnl.dht.domain.NodeVo">
+        delete from #{curNode} where identifier=#{identity.identifier}
+    </delete>
+    <update id="updateData" parameterType="bupt.fnl.dht.domain.NodeVo">
+        update #{curNode} set mappingData=#{identity.mappingData} where identifier=#{identity.identifier}
+    </update>
+    <select id="findData" parameterType="bupt.fnl.dht.domain.NodeVo" resultType="bupt.fnl.dht.domain.Identity">
+        select * from #{curNode} where identifier=#{identity.identifier}
+    </select>
+
+</mapper>

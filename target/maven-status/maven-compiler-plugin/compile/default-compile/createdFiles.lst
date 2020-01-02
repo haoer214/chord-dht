@@ -1,4 +1,8 @@
 bupt/fnl/dht/network/NodeDHT.class
-bupt/fnl/dht/node/Node.class
+bupt/fnl/dht/utils/Decryption.class
+bupt/fnl/dht/utils/Hash.class
+bupt/fnl/dht/jdbc/DataBase.class
 bupt/fnl/dht/node/FingerTable.class
+bupt/fnl/dht/node/Node.class
+bupt/fnl/dht/network/Communication.class
 bupt/fnl/dht/utils/Message.class

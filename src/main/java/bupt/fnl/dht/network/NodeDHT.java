@@ -252,8 +252,7 @@ public class NodeDHT implements Runnable {
         if (this.ID == 0) {
             // 初始化数据库连接信息
             try {
-                // 数据库配置文件放在当前目录
-                initParam("./mysql.ini");
+                initParam();
             } catch (Exception e) {
                 System.out.println("数据库连接失败！");
             }
@@ -305,7 +304,7 @@ public class NodeDHT implements Runnable {
         else if (this.ID == -1) {
             // 初始化数据库连接信息
             try {
-                initParam("./mysql.ini");
+                initParam();
             } catch (Exception e) {
                 System.out.println("数据库连接失败！");
             }
