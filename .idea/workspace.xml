@@ -1,33 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="ArtifactsWorkspaceSettings">
-    <artifacts-to-build>
-      <artifact name="chord-dht:jar" />
-    </artifacts-to-build>
-  </component>
   <component name="ChangeListManager">
-    <list default="true" id="de34242f-ab62-4c9f-9ab3-6104bf4bb30c" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__junit_junit_4_4.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__log4j_log4j_1_2_12.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_mybatis_mybatis_3_4_5.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/dao/IdentityDao.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/domain/Identity.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/domain/NodeVo.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/SqlMapConfig.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/bupt/fnl/dht/dao/IdentityDao.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__mysql_mysql_connector_java_5_1_44.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__mysql_mysql_connector_java_5_1_6.xml" afterDir="false" />
+    <list default="true" id="23384592-eb2a-4c2a-809d-8abc5332e9a4" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/firestorm.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/bupt/fnl/dht/dao/IdentityDaoTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/$PRODUCT_WORKSPACE_FILE$" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/artifacts/chord_dht_jar.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chord-dht.iml" beforeDir="false" afterPath="$PROJECT_DIR$/chord-dht.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/jdbc/DataBase.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/jdbc/DataBase.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/mysql.ini" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/network/Communication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/network/Communication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/bupt/fnl/dht/dao/IdentityDao.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/bupt/fnl/dht/dao/IdentityDao.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/chord-dht-1.0-SNAPSHOT-jar-with-dependencies.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/chord-dht-1.0-SNAPSHOT-jar-with-dependencies.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/chord-dht-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/chord-dht-1.0-SNAPSHOT.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/jdbc/DataBase.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/jdbc/DataBase.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/network/NodeDHT.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/network/NodeDHT.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/utils/Message.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/utils/Message.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,27 +42,10 @@
     <expand />
     <select />
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Interface" />
-        <option value="FxmlFile" />
-        <option value="Tag Library Descriptor" />
-        <option value="Class" />
-      </list>
-    </option>
-  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="IgnoredFileRootStore">
-    <option name="generatedRoots">
-      <set>
-        <option value="$PROJECT_DIR$/.idea" />
-      </set>
-    </option>
-  </component>
-  <component name="ProjectId" id="1SsaRfHoLD3F1xacv8kSYIZJdEG" />
+  <component name="ProjectId" id="1VpZmtxgFwo245nEKblxaOPgx3I" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
@@ -78,22 +55,91 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="jdk.selected.JAVA_MODULE" value="1.8" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="project.structure.last.edited" value="Modules" />
-    <property name="project.structure.proportion" value="0.15" />
-    <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+  </component>
+  <component name="RunManager" selected="JUnit.IdentityDaoTest.testFindData">
+    <configuration name="IdentityDaoTest.createTable" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="chord-dht" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="bupt.fnl.dht.dao.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="bupt.fnl.dht.dao" />
+      <option name="MAIN_CLASS_NAME" value="bupt.fnl.dht.dao.IdentityDaoTest" />
+      <option name="METHOD_NAME" value="createTable" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="IdentityDaoTest.testCreateTable" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="chord-dht" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="bupt.fnl.dht.dao.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="bupt.fnl.dht.dao" />
+      <option name="MAIN_CLASS_NAME" value="bupt.fnl.dht.dao.IdentityDaoTest" />
+      <option name="METHOD_NAME" value="testCreateTable" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="IdentityDaoTest.testFindData" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="chord-dht" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="bupt.fnl.dht.dao.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="bupt.fnl.dht.dao" />
+      <option name="MAIN_CLASS_NAME" value="bupt.fnl.dht.dao.IdentityDaoTest" />
+      <option name="METHOD_NAME" value="testFindData" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="IdentityDaoTest.testSaveData" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="chord-dht" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="bupt.fnl.dht.dao.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="bupt.fnl.dht.dao" />
+      <option name="MAIN_CLASS_NAME" value="bupt.fnl.dht.dao.IdentityDaoTest" />
+      <option name="METHOD_NAME" value="testSaveData" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.IdentityDaoTest.testFindData" />
+        <item itemvalue="JUnit.IdentityDaoTest.testSaveData" />
+        <item itemvalue="JUnit.IdentityDaoTest.testCreateTable" />
+        <item itemvalue="JUnit.IdentityDaoTest.createTable" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="ServiceViewManager">
     <option name="viewStates">
@@ -112,71 +158,37 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="de34242f-ab62-4c9f-9ab3-6104bf4bb30c" name="Default Changelist" comment="" />
-      <created>1572354750989</created>
+      <changelist id="23384592-eb2a-4c2a-809d-8abc5332e9a4" name="Default Changelist" comment="" />
+      <created>1577952158230</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1572354750989</updated>
-      <workItem from="1576124610531" duration="747000" />
-      <workItem from="1576638558472" duration="2144000" />
-      <workItem from="1577324135038" duration="2252000" />
-      <workItem from="1577347318477" duration="3746000" />
-      <workItem from="1577929626591" duration="9158000" />
+      <updated>1577952158230</updated>
+      <workItem from="1577952159791" duration="4477000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State>
-              <option name="COLUMN_ORDER" />
-            </State>
-          </value>
-        </entry>
-      </map>
-    </option>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="320" y="115" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1577937811286">
+    <state width="1398" height="245" key="GridCell.Tab.0.bottom" timestamp="1577955593642">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state x="320" y="115" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1440.900@0.0.1440.900" timestamp="1577937811286" />
-    <state x="533" y="141" key="#com.intellij.ide.util.MemberChooser" timestamp="1577945851702">
+    <state width="1398" height="245" key="GridCell.Tab.0.bottom/0.0.1440.900@0.0.1440.900" timestamp="1577955593642" />
+    <state width="1398" height="245" key="GridCell.Tab.0.center" timestamp="1577955593640">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state x="533" y="141" key="#com.intellij.ide.util.MemberChooser/0.0.1440.900@0.0.1440.900" timestamp="1577945851702" />
-    <state x="458" y="204" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1577931658824">
+    <state width="1398" height="245" key="GridCell.Tab.0.center/0.0.1440.900@0.0.1440.900" timestamp="1577955593640" />
+    <state width="1398" height="245" key="GridCell.Tab.0.left" timestamp="1577955593639">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state x="458" y="204" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1440.900@0.0.1440.900" timestamp="1577931658824" />
-    <state width="1398" height="245" key="GridCell.Tab.0.bottom" timestamp="1577350286697">
+    <state width="1398" height="245" key="GridCell.Tab.0.left/0.0.1440.900@0.0.1440.900" timestamp="1577955593639" />
+    <state width="1398" height="245" key="GridCell.Tab.0.right" timestamp="1577955593641">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1398" height="245" key="GridCell.Tab.0.bottom/0.0.1440.900@0.0.1440.900" timestamp="1577350286697" />
-    <state width="1398" height="245" key="GridCell.Tab.0.center" timestamp="1577350286696">
-      <screen x="0" y="0" width="1440" height="900" />
-    </state>
-    <state width="1398" height="245" key="GridCell.Tab.0.center/0.0.1440.900@0.0.1440.900" timestamp="1577350286696" />
-    <state width="1398" height="245" key="GridCell.Tab.0.left" timestamp="1577350286695">
-      <screen x="0" y="0" width="1440" height="900" />
-    </state>
-    <state width="1398" height="245" key="GridCell.Tab.0.left/0.0.1440.900@0.0.1440.900" timestamp="1577350286695" />
-    <state width="1398" height="245" key="GridCell.Tab.0.right" timestamp="1577350286696">
-      <screen x="0" y="0" width="1440" height="900" />
-    </state>
-    <state width="1398" height="245" key="GridCell.Tab.0.right/0.0.1440.900@0.0.1440.900" timestamp="1577350286696" />
-    <state x="229" y="89" key="SettingsEditor" timestamp="1577945846865">
-      <screen x="0" y="0" width="1440" height="900" />
-    </state>
-    <state x="229" y="89" key="SettingsEditor/0.0.1440.900@0.0.1440.900" timestamp="1577945846865" />
-    <state x="399" y="282" key="com.intellij.ide.util.TipDialog" timestamp="1577929626396">
-      <screen x="0" y="0" width="1440" height="900" />
-    </state>
-    <state x="399" y="282" key="com.intellij.ide.util.TipDialog/0.0.1440.900@0.0.1440.900" timestamp="1577929626396" />
+    <state width="1398" height="245" key="GridCell.Tab.0.right/0.0.1440.900@0.0.1440.900" timestamp="1577955593641" />
   </component>
 </project>

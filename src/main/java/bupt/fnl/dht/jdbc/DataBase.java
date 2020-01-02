@@ -10,8 +10,6 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 
 /**
  * 使用jdbc实现与mysql数据库的交互
@@ -20,6 +18,7 @@ import java.sql.ResultSet;
 public class DataBase {
 
     private static IdentityDao identityDao;
+    private static SqlSession sqlSession;
     private static NodeVo vo = new NodeVo();
     private static Identity identity = new Identity();
 
@@ -29,7 +28,7 @@ public class DataBase {
         // 2、创建SqlSessionFactory工厂
         SqlSessionFactory factory = new SqlSessionFactoryBuilder().build(in);
         // 3、使用工厂生产SqlSession对象
-        SqlSession sqlSession = factory.openSession();
+        sqlSession = factory.openSession();
         // 4、使用SqlSession创建Dao代理对象
         identityDao = sqlSession.getMapper(IdentityDao.class);
 
@@ -50,6 +49,7 @@ public class DataBase {
         vo.setSucHash(sucNode);
         identityDao.transferPart(vo);
         identityDao.deletePart(vo);
+        sqlSession.commit();
     }
 
     // 节点退出时，数据迁移到后继节点
@@ -57,6 +57,7 @@ public class DataBase {
         vo.setCurNode("node"+newNode);
         vo.setSucNode("node"+sucNode);
         identityDao.transferAll(vo);
+        sqlSession.commit();
     }
 
     // 节点退出时，删除数据表node[i]（i表示节点ID）
@@ -69,7 +70,6 @@ public class DataBase {
     public static boolean ifExist(int nodeID, String identifier) {
         vo.setCurNode("node"+nodeID);
         identity.setIdentifier(identifier);
-        vo.setIdentity(identity);
         return identityDao.findData(vo)!=null;
     }
 
@@ -79,16 +79,16 @@ public class DataBase {
         identity.setHash(hash);
         identity.setIdentifier(identifier);
         identity.setMappingData(mappingData);
-        vo.setIdentity(identity);
         identityDao.saveData(vo);
+        sqlSession.commit();
     }
 
     // 删除数据 [hash, identifier, mappingData]
     public static void deleteData(int nodeID, String identifier) {
         vo.setCurNode("node"+nodeID);
         identity.setIdentifier(identifier);
-        vo.setIdentity(identity);
         identityDao.deleteData(vo);
+        sqlSession.commit();
     }
 
     // 更新数据 [hash, identifier, mappingData]
@@ -96,15 +96,14 @@ public class DataBase {
         vo.setCurNode("node"+nodeID);
         identity.setIdentifier(identifier);
         identity.setMappingData(mappingData);
-        vo.setIdentity(identity);
         identityDao.updateData(vo);
+        sqlSession.commit();
     }
 
     // 通过标识解析数据 [hash, identifier, mappingData]
     public static String resolveData(int nodeID, String identifier) {
         vo.setCurNode("node"+nodeID);
         identity.setIdentifier(identifier);
-        vo.setIdentity(identity);
         return identityDao.findData(vo).getMappingData();
     }
 }
