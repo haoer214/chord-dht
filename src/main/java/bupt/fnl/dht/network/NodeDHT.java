@@ -354,19 +354,12 @@ public class NodeDHT implements Runnable {
              */
 
             // 将部分数据从后继迁移到当前节点
-            if (me.getID() > finger[1].getSuccessor().getID()) { // 新加入节点ID大于后继
-                try {
-                    transferPart(me.getID(), finger[1].getSuccessor().getID());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else { // 新加入节点ID小于后继
-                try {
-                    transferPart(me.getID(), finger[1].getSuccessor().getID());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            try {
+                transferPart(me.getID(), finger[1].getSuccessor().getID());
+            } catch (Exception e) {
+                System.out.println("节点加入--数据迁移失败！");
             }
+
 
             try {
                 // 释放对象锁

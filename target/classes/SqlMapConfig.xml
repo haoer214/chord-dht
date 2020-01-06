@@ -14,7 +14,7 @@
             <dataSource type="POOLED">
                 <!--配置连接数据库的4个基本信息-->
                 <property name="driver" value="com.mysql.jdbc.Driver"/>
-                <property name="url" value="jdbc:mysql://10.28.209.189:3306/dht?useSSL=true"/>
+                <property name="url" value="jdbc:mysql://10.28.230.107:3306/dht?useSSL=true"/>
                 <property name="username" value="root"/>
                 <property name="password" value="111111"/>
             </dataSource>

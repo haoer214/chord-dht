@@ -8,10 +8,26 @@
         create table ${curNode}(hash int, identifier varchar(255) primary key, mappingData text)
     </update>
     <insert id="transferPart" parameterType="bupt.fnl.dht.domain.NodeVo">
-        insert into ${curNode} select * from ${sucNode} where hash&lt;=#{curHash} and hash>#{sucHash}
+        insert into ${curNode} select * from ${sucNode} where
+        <choose>
+            <when test="curHash > sucHash">
+                hash&lt;=#{curHash} and hash>#{sucHash}
+            </when>
+            <otherwise>
+                hash&lt;=#{curHash} or hash>#{sucHash}
+            </otherwise>
+        </choose>
     </insert>
     <delete id="deletePart" parameterType="bupt.fnl.dht.domain.NodeVo">
-        delete from ${sucNode} where hash&lt;=#{curHash} and hash>#{sucHash}
+        delete from ${sucNode} where
+        <choose>
+            <when test="curHash > sucHash">
+                hash&lt;=#{curHash} and hash>#{sucHash}
+            </when>
+            <otherwise>
+                hash&lt;=#{curHash} or hash>#{sucHash}
+            </otherwise>
+        </choose>
     </delete>
     <insert id="transferAll" parameterType="bupt.fnl.dht.domain.NodeVo">
         insert into ${sucNode} select * from ${curNode}
