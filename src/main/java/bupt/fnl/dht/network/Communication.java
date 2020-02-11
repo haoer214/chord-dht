@@ -30,6 +30,7 @@ public class Communication {
             // 查询区块链里是否存有发送者的前缀
             String orgName = received_message.getOrgName();
             JSONArray jsonArrayFromBlockchain = QueryAuthority.query(orgName);
+            System.out.println();
             if (jsonArrayFromBlockchain == null || jsonArrayFromBlockchain.isEmpty()) {
                 response_message.setFeedback("该企业未注册，没有操作权限！");
                 System.out.println("该企业未注册，没有操作权限！");
@@ -169,7 +170,7 @@ public class Communication {
                 // 删除区块链状态数据库中标识的映射数据hash
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("identifier",identity);
-                jsonObject.put("mappingData_hash",null); // 这里设为null会有异常
+                jsonObject.put("mappingData_hash",null); // 【注意】这里设为null会有异常，未解决
                 new InvokeHash("删除").invoke(jsonObject);
 
                 message.setFeedback("标识 " + identity + " 删除成功！");

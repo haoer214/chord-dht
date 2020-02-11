@@ -252,8 +252,7 @@ public class NodeDHT implements Runnable {
         if (this.ID == 0) {
             // 初始化数据库连接信息
             try {
-                // 数据库配置文件放在当前目录
-                initParam("./mysql.ini");
+                initParam();
             } catch (Exception e) {
                 System.out.println("数据库连接失败！");
             }
@@ -305,7 +304,7 @@ public class NodeDHT implements Runnable {
         else if (this.ID == -1) {
             // 初始化数据库连接信息
             try {
-                initParam("./mysql.ini");
+                initParam();
             } catch (Exception e) {
                 System.out.println("数据库连接失败！");
             }
@@ -355,19 +354,12 @@ public class NodeDHT implements Runnable {
              */
 
             // 将部分数据从后继迁移到当前节点
-            if (me.getID() > finger[1].getSuccessor().getID()) { // 新加入节点ID大于后继
-                try {
-                    transferPart(me.getID(), finger[1].getSuccessor().getID());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else { // 新加入节点ID小于后继
-                try {
-                    transferPart(me.getID(), finger[1].getSuccessor().getID());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            try {
+                transferPart(me.getID(), finger[1].getSuccessor().getID());
+            } catch (Exception e) {
+                System.out.println("节点加入--数据迁移失败！");
             }
+
 
             try {
                 // 释放对象锁

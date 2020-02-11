@@ -1,4 +1,11 @@
+/Users/zhao/Documents/创新型项目/chord-dht/src/main/java/bupt/fnl/dht/utils/Hash.java
 /Users/zhao/Documents/创新型项目/chord-dht/src/main/java/bupt/fnl/dht/node/Node.java
+/Users/zhao/Documents/创新型项目/chord-dht/src/main/java/bupt/fnl/dht/utils/Decryption.java
 /Users/zhao/Documents/创新型项目/chord-dht/src/main/java/bupt/fnl/dht/utils/Message.java
 /Users/zhao/Documents/创新型项目/chord-dht/src/main/java/bupt/fnl/dht/node/FingerTable.java
+/Users/zhao/Documents/创新型项目/chord-dht/src/main/java/bupt/fnl/dht/network/Communication.java
+/Users/zhao/Documents/创新型项目/chord-dht/src/main/java/bupt/fnl/dht/domain/Identity.java
+/Users/zhao/Documents/创新型项目/chord-dht/src/main/java/bupt/fnl/dht/domain/NodeVo.java
+/Users/zhao/Documents/创新型项目/chord-dht/src/main/java/bupt/fnl/dht/jdbc/DataBase.java
 /Users/zhao/Documents/创新型项目/chord-dht/src/main/java/bupt/fnl/dht/network/NodeDHT.java
+/Users/zhao/Documents/创新型项目/chord-dht/src/main/java/bupt/fnl/dht/dao/IdentityDao.java
