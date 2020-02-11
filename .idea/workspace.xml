@@ -3,12 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="593b7313-e0b4-42d4-a9ca-c310a3328f61" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/network/NodeDHT.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/network/NodeDHT.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/SqlMapConfig.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/SqlMapConfig.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/bupt/fnl/dht/dao/IdentityDao.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/bupt/fnl/dht/dao/IdentityDao.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/chord-dht-1.0-SNAPSHOT-jar-with-dependencies.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/chord-dht-1.0-SNAPSHOT-jar-with-dependencies.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/chord-dht-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/chord-dht-1.0-SNAPSHOT.jar" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -151,7 +145,13 @@
       <option name="presentableId" value="Default" />
       <updated>1577952158230</updated>
       <workItem from="1577952159791" duration="4477000" />
-      <workItem from="1578295199941" duration="2941000" />
+      <workItem from="1578295199941" duration="3626000" />
+      <workItem from="1579593896946" duration="623000" />
+      <workItem from="1580282516857" duration="6000" />
+      <workItem from="1580346272093" duration="11000" />
+      <workItem from="1580697430166" duration="15000" />
+      <workItem from="1580697775746" duration="40000" />
+      <workItem from="1581386783380" duration="242000" />
     </task>
     <servers />
   </component>
@@ -178,5 +178,13 @@
       <screen x="0" y="0" width="1440" height="900" />
     </state>
     <state width="1398" height="245" key="GridCell.Tab.0.right/0.0.1440.900@0.0.1440.900" timestamp="1578298222806" />
+    <state x="399" y="282" key="com.intellij.ide.util.TipDialog" timestamp="1580346273184">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state x="399" y="282" key="com.intellij.ide.util.TipDialog/0.0.1440.900@0.0.1440.900" timestamp="1580346273184" />
+    <state x="114" y="147" key="new project wizard" timestamp="1580697810865">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state x="114" y="147" key="new project wizard/0.0.1440.900@0.0.1440.900" timestamp="1580697810865" />
   </component>
 </project>
