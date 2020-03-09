@@ -1,54 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-<<<<<<< HEAD
-  <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-  </component>
-  <component name="ProjectId" id="1VpmRGFlq0aA8QV7pImAW3MJ2iT" />
-=======
   <component name="ChangeListManager">
-    <list default="true" id="593b7313-e0b4-42d4-a9ca-c310a3328f61" name="Default Changelist" comment="">
+    <list default="true" id="36174546-e6d6-4936-a02a-83dfc34678de" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/$PRODUCT_WORKSPACE_FILE$" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/network/MakeConnection.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/node/info/NodeInfo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/node/print/Print.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/runnable/FirstNodeThread.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__bupt_fnl_dht_blockchain_1_0_SNAPSHOT.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__junit_junit_4_4.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__log4j_log4j_1_2_12.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__mysql_mysql_connector_java_5_1_6.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_mybatis_mybatis_3_4_5.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chord-dht.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/network/NodeDHT.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/network/NodeDHT.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="DatabaseView">
-    <option name="SHOW_INTERMEDIATE" value="true" />
-    <option name="GROUP_DATA_SOURCES" value="true" />
-    <option name="GROUP_SCHEMA" value="true" />
-    <option name="GROUP_CONTENTS" value="false" />
-    <option name="SORT_POSITIONED" value="false" />
-    <option name="SHOW_EMPTY_GROUPS" value="false" />
-    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
-    <option name="HIDDEN_KINDS">
-      <set />
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
     </option>
-    <expand />
-    <select />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectId" id="1VpZmtxgFwo245nEKblxaOPgx3I" />
+  <component name="ProjectId" id="1Xw3i6ZDKJsZj6tINKKPkCWzzlW" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
->>>>>>> dev
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
-<<<<<<< HEAD
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="aspect.path.notification.shown" value="true" />
-=======
-    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -59,80 +55,6 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-  </component>
-  <component name="RunManager" selected="JUnit.IdentityDaoTest.testFindData">
-    <configuration name="IdentityDaoTest.createTable" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="chord-dht" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="bupt.fnl.dht.dao.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="bupt.fnl.dht.dao" />
-      <option name="MAIN_CLASS_NAME" value="bupt.fnl.dht.dao.IdentityDaoTest" />
-      <option name="METHOD_NAME" value="createTable" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="IdentityDaoTest.testCreateTable" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="chord-dht" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="bupt.fnl.dht.dao.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="bupt.fnl.dht.dao" />
-      <option name="MAIN_CLASS_NAME" value="bupt.fnl.dht.dao.IdentityDaoTest" />
-      <option name="METHOD_NAME" value="testCreateTable" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="IdentityDaoTest.testFindData" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="chord-dht" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="bupt.fnl.dht.dao.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="bupt.fnl.dht.dao" />
-      <option name="MAIN_CLASS_NAME" value="bupt.fnl.dht.dao.IdentityDaoTest" />
-      <option name="METHOD_NAME" value="testFindData" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="IdentityDaoTest.testSaveData" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="chord-dht" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="bupt.fnl.dht.dao.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="bupt.fnl.dht.dao" />
-      <option name="MAIN_CLASS_NAME" value="bupt.fnl.dht.dao.IdentityDaoTest" />
-      <option name="METHOD_NAME" value="testSaveData" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="JUnit.IdentityDaoTest.testFindData" />
-        <item itemvalue="JUnit.IdentityDaoTest.testSaveData" />
-        <item itemvalue="JUnit.IdentityDaoTest.testCreateTable" />
-        <item itemvalue="JUnit.IdentityDaoTest.createTable" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="ServiceViewManager">
     <option name="viewStates">
@@ -151,53 +73,47 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="593b7313-e0b4-42d4-a9ca-c310a3328f61" name="Default Changelist" comment="" />
-      <created>1577952158230</created>
+      <changelist id="36174546-e6d6-4936-a02a-83dfc34678de" name="Default Changelist" comment="" />
+      <created>1581943454717</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1577952158230</updated>
-      <workItem from="1577952159791" duration="4477000" />
-      <workItem from="1578295199941" duration="3626000" />
-      <workItem from="1579593896946" duration="623000" />
-      <workItem from="1580282516857" duration="6000" />
-      <workItem from="1580346272093" duration="11000" />
-      <workItem from="1580697430166" duration="15000" />
-      <workItem from="1580697775746" duration="40000" />
-      <workItem from="1581386783380" duration="242000" />
+      <updated>1581943454717</updated>
+      <workItem from="1581945104355" duration="1669000" />
+      <workItem from="1582627786144" duration="557000" />
+      <workItem from="1582632486789" duration="772000" />
+      <workItem from="1583120777297" duration="679000" />
+      <workItem from="1583659562008" duration="9147000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
-  <component name="VcsManagerConfiguration">
-    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="WindowStateProjectService">
-    <state width="1398" height="245" key="GridCell.Tab.0.bottom" timestamp="1578298222807">
+    <state x="533" y="166" key="#com.intellij.ide.util.MemberChooser" timestamp="1583736912513">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1398" height="245" key="GridCell.Tab.0.bottom/0.0.1440.900@0.0.1440.900" timestamp="1578298222807" />
-    <state width="1398" height="245" key="GridCell.Tab.0.center" timestamp="1578298222806">
+    <state x="533" y="166" key="#com.intellij.ide.util.MemberChooser/0.0.1440.900@0.0.1440.900" timestamp="1583736912513" />
+    <state x="458" y="220" key="extract.method.dialog" timestamp="1583737601586">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1398" height="245" key="GridCell.Tab.0.center/0.0.1440.900@0.0.1440.900" timestamp="1578298222806" />
-    <state width="1398" height="245" key="GridCell.Tab.0.left" timestamp="1578298222805">
+    <state x="458" y="220" key="extract.method.dialog/0.0.1440.900@0.0.1440.900" timestamp="1583737601586" />
+    <state x="385" y="196" key="search.everywhere.popup" timestamp="1583735636212">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1398" height="245" key="GridCell.Tab.0.left/0.0.1440.900@0.0.1440.900" timestamp="1578298222805" />
-    <state width="1398" height="245" key="GridCell.Tab.0.right" timestamp="1578298222806">
-      <screen x="0" y="0" width="1440" height="900" />
-    </state>
-    <state width="1398" height="245" key="GridCell.Tab.0.right/0.0.1440.900@0.0.1440.900" timestamp="1578298222806" />
-    <state x="399" y="282" key="com.intellij.ide.util.TipDialog" timestamp="1580346273184">
-      <screen x="0" y="0" width="1440" height="900" />
-    </state>
-    <state x="399" y="282" key="com.intellij.ide.util.TipDialog/0.0.1440.900@0.0.1440.900" timestamp="1580346273184" />
-    <state x="114" y="147" key="new project wizard" timestamp="1580697810865">
-      <screen x="0" y="0" width="1440" height="900" />
-    </state>
-    <state x="114" y="147" key="new project wizard/0.0.1440.900@0.0.1440.900" timestamp="1580697810865" />
->>>>>>> dev
+    <state x="385" y="196" key="search.everywhere.popup/0.0.1440.900@0.0.1440.900" timestamp="1583735636212" />
   </component>
 </project>

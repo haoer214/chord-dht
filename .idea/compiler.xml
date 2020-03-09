@@ -9,8 +9,5 @@
         <module name="chord-dht" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="chord-dht" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
 </project>
