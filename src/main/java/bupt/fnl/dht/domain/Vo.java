@@ -1,6 +1,9 @@
 package bupt.fnl.dht.domain;
 
-public class NodeVo {
+/**
+ * dao方法参数传入的实体类
+ */
+public class Vo {
 
     private int curHash;
     private int sucHash;

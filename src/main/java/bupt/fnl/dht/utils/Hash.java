@@ -3,10 +3,8 @@ package bupt.fnl.dht.utils;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 
-import static bupt.fnl.dht.network.NodeDHT.numDHT;
-
 public class Hash {
-    public static int HashFunc(String url) {
+    public static int HashFunc(String url, int numDHT) {
         int KID=-1;
         try {
             MessageDigest md = MessageDigest.getInstance("SHA1");

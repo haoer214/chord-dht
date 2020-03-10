@@ -1,7 +1,7 @@
 package bupt.fnl.dht.dao;
 
 import bupt.fnl.dht.domain.Identity;
-import bupt.fnl.dht.domain.NodeVo;
+import bupt.fnl.dht.domain.Vo;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -13,14 +13,12 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.junit.Assert.*;
-
 public class IdentityDaoTest {
 
     private InputStream in;
     private SqlSession sqlSession;
     private IdentityDao identityDao;
-    private NodeVo vo = new NodeVo();
+    private Vo vo = new Vo();
     private Identity identity = new Identity();
 
     @Before

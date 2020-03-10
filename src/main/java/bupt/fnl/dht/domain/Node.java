@@ -1,8 +1,11 @@
-package bupt.fnl.dht.node;
+package bupt.fnl.dht.domain;
 
 import java.io.Serializable;
 
-// 【注意】Node必须实现序列化接口
+/**
+ * Node：dht节点对应的实体类
+ *【注意】Node必须实现序列化接口
+ */
 public class Node implements Serializable {
 	private int myID;
 	private String myIP;

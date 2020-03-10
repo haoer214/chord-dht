@@ -1,5 +1,8 @@
-package bupt.fnl.dht.node;
+package bupt.fnl.dht.domain;
 
+/**
+ * FingerTable：路由表对应的实体类
+ */
 public class FingerTable{
 
 	private int start;

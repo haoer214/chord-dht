@@ -2,7 +2,7 @@ package bupt.fnl.dht.jdbc;
 
 import bupt.fnl.dht.dao.IdentityDao;
 import bupt.fnl.dht.domain.Identity;
-import bupt.fnl.dht.domain.NodeVo;
+import bupt.fnl.dht.domain.Vo;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -19,7 +19,7 @@ public class DataBase {
 
     private static IdentityDao identityDao;
     private static SqlSession sqlSession;
-    private static NodeVo vo = new NodeVo();
+    private static Vo vo = new Vo();
     private static Identity identity = new Identity();
 
     public static void initParam() throws IOException {

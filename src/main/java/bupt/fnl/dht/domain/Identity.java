@@ -2,6 +2,9 @@ package bupt.fnl.dht.domain;
 
 import java.io.Serializable;
 
+/**
+ * Identity：标识对应的实体类
+ */
 public class Identity implements Serializable {
 
     private int hash;

@@ -1,24 +1,22 @@
-package bupt.fnl.dht.node.print;
+package bupt.fnl.dht.service.impl;
 
-import bupt.fnl.dht.node.FingerTable;
-import bupt.fnl.dht.node.Node;
+import bupt.fnl.dht.domain.FingerTable;
+import bupt.fnl.dht.domain.Node;
+import bupt.fnl.dht.domain.NodeInfo;
+import bupt.fnl.dht.service.Print;
 
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * 打印各种信息
- */
-public class Print {
+public class PrintImpl implements Print {
 
-    private Node me;                // 当前节点
-    private List<Node> nodeList;    // 节点列表
-    private FingerTable[] finger;   // 路由表
-    private int m;                  // 路由表条数
-    private int numDHT;             // 网络最大节点数
+    NodeInfo nodeInfo;
+
 
     // 打印路由表信息
     public void printFingerInfo(){
+        FingerTable[] finger = nodeInfo.getFinger();
+        int m = nodeInfo.getM();
         System.out.println("*****路由表信息*****");
         for (int i = 1; i <= m; i++) {
             System.out.println("Index[" + finger[i].getStart() + "]       " + "后继节点ID: " + finger[i].getSuccessor().getID());
@@ -28,6 +26,7 @@ public class Print {
 
     // 打印节点信息
     public void printNodeInfo(){
+        List<Node> nodeList = nodeInfo.getNodeList();
         Iterator<Node> iterator = nodeList.iterator();
         String string;
         System.out.println("*****节点列表*****");

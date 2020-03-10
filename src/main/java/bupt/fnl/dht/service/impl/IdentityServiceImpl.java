@@ -1,7 +1,11 @@
-package bupt.fnl.dht.network;
+package bupt.fnl.dht.service.impl;
 
-import bupt.fnl.dht.node.Node;
-import bupt.fnl.dht.utils.Message;
+import bupt.fnl.dht.domain.Message;
+import bupt.fnl.dht.domain.Node;
+import bupt.fnl.dht.domain.NodeInfo;
+import bupt.fnl.dht.network.MakeConnection;
+import bupt.fnl.dht.service.IdentityService;
+import bupt.fnl.dht.service.NodeService;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.app.chaincode.authority.QueryAuthority;
@@ -12,26 +16,31 @@ import static bupt.fnl.dht.jdbc.DataBase.*;
 import static bupt.fnl.dht.jdbc.DataBase.resolveData;
 import static bupt.fnl.dht.utils.Decryption.decrypt;
 import static bupt.fnl.dht.utils.Decryption.digest;
-import static bupt.fnl.dht.network.NodeDHT.*;
 import static bupt.fnl.dht.utils.Hash.HashFunc;
 
-public class Communication {
+public class IdentityServiceImpl implements IdentityService {
+
+    NodeInfo nodeInfo;
+
+    NodeService nodeService;
+
+    MakeConnection makeConnection;
 
     /* 收到Web消息后进行一系列权限校验 */
-    public static Message authentication(Message received_message) throws Exception {
+    public Message authentication(Message received_message) {
         Message response_message = received_message;
         // flag == 1，是节点初始化配置指令，来自其他dht节点
         if (received_message.getInitNode_flag() == 1) {
-            String response_initInfo = considerInput(received_message.getInitInfo());
+            String response_initInfo = makeConnection.considerInput(received_message.getInitInfo());
             response_message.setInitInfo(response_initInfo);
         }
         // 接收Web后台发送的message（包括 发送者前缀orgName 操作类型type 密文cipherText）
         else {
             // 查询区块链里是否存有发送者的前缀
             String orgName = received_message.getOrgName();
-            JSONArray jsonArrayFromBlockchain = QueryAuthority.query(orgName);
+            JSONArray jsonArrayFromBlockChain = QueryAuthority.query(orgName);
             System.out.println();
-            if (jsonArrayFromBlockchain == null || jsonArrayFromBlockchain.isEmpty()) {
+            if (jsonArrayFromBlockChain == null || jsonArrayFromBlockChain.isEmpty()) {
                 response_message.setFeedback("该企业未注册，没有操作权限！");
                 System.out.println("该企业未注册，没有操作权限！");
             } else {
@@ -40,11 +49,16 @@ public class Communication {
                  * 控制模块，逻辑判断
                  */
                 // 从区块链获取公钥
-                String publicKey = jsonArrayFromBlockchain.getJSONObject(0).getJSONObject("Record").getString("public_key");
+                String publicKey = jsonArrayFromBlockChain.getJSONObject(0).getJSONObject("Record").getString("public_key");
 
                 // 公钥解密，获得明文
                 String cipherText = received_message.getCipherText(); // 密文
-                String plainText = decrypt(cipherText, publicKey); // 明文-String格式
+                String plainText = null; // 明文-String格式
+                try {
+                    plainText = decrypt(cipherText, publicKey);
+                } catch (Exception e) {
+                    System.out.println("解密失败！");;
+                }
                 JSONObject plainTextJson = JSONObject.fromObject(plainText); // 明文-Json格式
                 // 设置message的值
                 response_message.setPlainText(plainText);
@@ -55,8 +69,8 @@ public class Communication {
                 String[] tokens = response_message.getIdentity().split("/");
                 String prefix = tokens[0];
                 String authority = "";
-                for (int i = 0; i < jsonArrayFromBlockchain.size(); i++) {
-                    JSONObject tmpJson = jsonArrayFromBlockchain.getJSONObject(i).getJSONObject("Record");
+                for (int i = 0; i < jsonArrayFromBlockChain.size(); i++) {
+                    JSONObject tmpJson = jsonArrayFromBlockChain.getJSONObject(i).getJSONObject("Record");
                     if (tmpJson.getString("identity_prefix").equals(prefix)) {
                         authority = tmpJson.getString("authority");
                         break;
@@ -83,7 +97,7 @@ public class Communication {
     }
 
     /* 对于不同的操作类型，返回不同的 Message 对象 */
-    public static Message considerType(Message message){
+    public Message considerType(Message message){
         Message result = message;
         switch (message.getType()) {
 //            case "getNodeList":
@@ -122,12 +136,13 @@ public class Communication {
     }
 
     /* 增 */
-    public static Message registerIdentity(Message message) throws Exception {
+    public Message registerIdentity(Message message) {
         String identity = message.getIdentity();
         String mappingData = message.getMappingData();
         System.out.println("【系统提示】- 有新标识 "+identity+" 请求注册...");
-        int kid = HashFunc(identity);//标识的哈希
-        Node targetNode = find_successor(kid);//应该存储的位置
+        int kid = HashFunc(identity, nodeInfo.getNumDHT());//标识的哈希
+        Node targetNode = nodeService.find_successor(kid);//应该存储的位置
+        Node me = nodeInfo.getMe();
         if (targetNode.getID() == me.getID()) {
             // 判断标识是否已被注册
             if (ifExist(me.getID(), identity)) {
@@ -149,15 +164,16 @@ public class Communication {
             return message;
         } else {
             System.out.println("注册请求已经转发至节点 " + targetNode.getID());
-            return makeConnectionByObject(targetNode.getIP(), targetNode.getPort(), message);
+            return makeConnection.makeConnectionByObject(targetNode.getIP(), targetNode.getPort(), message);
         }
     }
     /* 删 */
-    public static Message deleteIdentity(Message message) throws Exception {
+    public Message deleteIdentity(Message message) {
         String identity = message.getIdentity();
         System.out.println("【系统提示】- 收到标识 "+identity+" 的删除请求...");
-        int kid = HashFunc(identity);//标识的哈希
-        Node targetNode = find_successor(kid);//应该存储的位置
+        int kid = HashFunc(identity, nodeInfo.getNumDHT());//标识的哈希
+        Node targetNode = nodeService.find_successor(kid);//应该存储的位置
+        Node me = nodeInfo.getMe();
         if (targetNode.getID() == me.getID()) {
             // 判断预删除标识是否存在
             if (!ifExist(me.getID(), identity)) {
@@ -178,16 +194,17 @@ public class Communication {
             return message;
         } else {
             System.out.println("删除请求已经转发至节点 " + targetNode.getID());
-            return makeConnectionByObject(targetNode.getIP(), targetNode.getPort(), message);
+            return makeConnection.makeConnectionByObject(targetNode.getIP(), targetNode.getPort(), message);
         }
     }
     /* 改 */
-    public static Message updateIdentity(Message message) throws Exception {
+    public Message updateIdentity(Message message) {
         String identity = message.getIdentity();
         String mappingData = message.getMappingData();
         System.out.println("【系统提示】- 标识 "+identity+" 请求更新映射数据...");
-        int kid = HashFunc(identity);//标识的哈希
-        Node targetNode = find_successor(kid);//应该存储的位置
+        int kid = HashFunc(identity, nodeInfo.getNumDHT());//标识的哈希
+        Node targetNode = nodeService.find_successor(kid);//应该存储的位置
+        Node me = nodeInfo.getMe();
         if (targetNode.getID() == me.getID()) {
             // 判断标识是否已被注册
             if (!ifExist(me.getID(), identity)) {
@@ -209,14 +226,15 @@ public class Communication {
             return message;
         } else {
             System.out.println("更新请求已经转发至节点 " + targetNode.getID());
-            return makeConnectionByObject(targetNode.getIP(), targetNode.getPort(), message);
+            return makeConnection.makeConnectionByObject(targetNode.getIP(), targetNode.getPort(), message);
         }
     }
     /* 查 */
-    public static Message resolveIdentity(Message message) throws Exception {
+    public Message resolveIdentity(Message message) {
         String identity = message.getIdentity();
         System.out.println("【系统提示】- 收到标识 "+identity+" 的解析请求...");
-        Node targetNode = find_successor(HashFunc(identity));
+        Node targetNode = nodeService.find_successor(HashFunc(identity, nodeInfo.getNumDHT()));
+        Node me = nodeInfo.getMe();
         if (targetNode.getID() == me.getID()) {
             // 从本地数据库获取内容
 //            System.out.println((resolveData("select *" + " from node" + me.getID() + " where Identity='" + identity + "';"))
@@ -244,15 +262,7 @@ public class Communication {
             // 从其他节点数据库获取内容
 //            System.out.println(makeConnection(targetNode.getIP(), targetNode.getPort(), "geturl/" + identity)
 //                    .replaceAll("#", "\n"));
-            return makeConnectionByObject(targetNode.getIP(), targetNode.getPort(),message);
+            return makeConnection.makeConnectionByObject(targetNode.getIP(), targetNode.getPort(),message);
         }
-    }
-
-    /* 获取所有节点信息 */
-    public static Node[] getNodeList() {
-        // 【注意】必须把List转换为数组才能序列化传输
-        Node[] nodes = new Node[nodeList.size()];
-        nodeList.toArray(nodes);
-        return nodes;
     }
 }
