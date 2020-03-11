@@ -4,14 +4,17 @@ import bupt.fnl.dht.domain.FingerTable;
 import bupt.fnl.dht.domain.Node;
 import bupt.fnl.dht.domain.NodeInfo;
 import bupt.fnl.dht.service.Print;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Iterator;
 import java.util.List;
 
+@Service("print")
 public class PrintImpl implements Print {
 
+    @Autowired
     NodeInfo nodeInfo;
-
 
     // 打印路由表信息
     public void printFingerInfo(){
@@ -27,14 +30,15 @@ public class PrintImpl implements Print {
     // 打印节点信息
     public void printNodeInfo(){
         List<Node> nodeList = nodeInfo.getNodeList();
-        Iterator<Node> iterator = nodeList.iterator();
-        String string;
-        System.out.println("*****节点列表*****");
-        if(nodeList.size()==0)
+        if (nodeList == null || nodeList.size() == 0) {
             System.out.println("列表为空！");
+            return;
+        }
+        Iterator<Node> iterator = nodeList.iterator();
+        System.out.println("*****节点列表*****");
         while(iterator.hasNext()) {
             Node node = iterator.next();
-            string="节点ID:"+node.getID()+"  IP地址："+node.getIP()+"  端口号： "+node.getPort()+" ";
+            String string = "节点ID: " + node.getID() + " IP地址: " + node.getIP() + " 端口号: " + node.getPort();
             System.out.println(string);
         }
         System.out.println();

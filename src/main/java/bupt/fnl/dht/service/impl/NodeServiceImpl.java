@@ -5,8 +5,11 @@ import bupt.fnl.dht.domain.Message;
 import bupt.fnl.dht.domain.Node;
 import bupt.fnl.dht.domain.NodeInfo;
 import bupt.fnl.dht.network.MakeConnection;
+import bupt.fnl.dht.dao.DataBase;
 import bupt.fnl.dht.service.NodeService;
 import bupt.fnl.dht.service.Print;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -18,17 +21,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static bupt.fnl.dht.jdbc.DataBase.deleteTable;
-import static bupt.fnl.dht.jdbc.DataBase.transferAll;
-
+@Service("nodeService")
 public class NodeServiceImpl implements NodeService {
 
+    @Autowired
     NodeInfo nodeInfo;
     String knownIP, knownPort;
-    Node me;
-    List<Node> nodeList;
+    @Autowired
     NodeService nodeService;
+    @Autowired
     MakeConnection makeConnection;
+    @Autowired
+    DataBase dataBase;
+    @Autowired
     Print print;
     /**
      * initNode - 初始化节点信息
@@ -45,8 +50,8 @@ public class NodeServiceImpl implements NodeService {
 
         if (args.length == 2){
             String myPort = args[0];
-            me = getCurrentNode(Integer.parseInt(args[1]));
             nodeInfo.setMyPort(myPort);
+            Node me = getCurrentNode(Integer.parseInt(args[1]));
             nodeInfo.setMe(me);
             nodeInfo.setPred(me);
 
@@ -57,8 +62,8 @@ public class NodeServiceImpl implements NodeService {
             nodeInfo.setKnownHostIP(knownIP);
             nodeInfo.setKnownHostPort(knownPort);
             String myPort = args[2];
-            me = getCurrentNode(Integer.parseInt(args[3]));
             nodeInfo.setMyPort(myPort);
+            Node me = getCurrentNode(Integer.parseInt(args[3]));
             nodeInfo.setMe(me);
 
             Message request = new Message();
@@ -102,7 +107,7 @@ public class NodeServiceImpl implements NodeService {
         }
         String myIP = mIP.getHostAddress();
         nodeInfo.setMyIP(myIP);
-        System.out.println("本节点IP地址: " + myIP);
+        System.out.println("IP地址: " + myIP);
         // 当前节点端口
         String myPort = nodeInfo.getMyPort();
         // 当前节点 ID
@@ -115,6 +120,8 @@ public class NodeServiceImpl implements NodeService {
     // 获取新加入网络的节点ID
     public int getNodeID(String nodeIP, String nodePort) {
 
+        List<Node> nodeList = nodeInfo.getNodeList();
+
         int nodeID;
 
         try {
@@ -125,6 +132,11 @@ public class NodeServiceImpl implements NodeService {
             byte[] hashBytes = md.digest();
             BigInteger hashNum = new BigInteger(1, hashBytes);
             nodeID = Math.abs(hashNum.intValue()) % nodeInfo.getNumDHT();
+
+            System.out.println("新节点加入... ");
+
+            if (nodeList == null) // 说明是第一个节点
+                return nodeID;
 
             // 判断节点hash是否重复
             Set<Integer> nodesIDSet = new HashSet<>();
@@ -137,8 +149,6 @@ public class NodeServiceImpl implements NodeService {
                 hashNum = new BigInteger(1, hashBytes);
                 nodeID = Math.abs(hashNum.intValue()) % nodeInfo.getNumDHT();
             }
-
-            System.out.println("新节点加入... ");
             return nodeID;
 
         } catch (NoSuchAlgorithmException e) {
@@ -150,6 +160,7 @@ public class NodeServiceImpl implements NodeService {
     // 处理返回的m个node信息并生成list(路由表中最多只有m个node)
     public void getNode(String str) {
         String[] tokens = str.split("/");
+        List<Node> nodeList = nodeInfo.getNodeList();
         Node newNode;
         for (int i = 1; i <= (tokens.length / 3); i++) {
             newNode = new Node(Integer.parseInt(tokens[3 * (i - 1)]), tokens[1 + 3 * (i - 1)], tokens[2 + 3 * (i - 1)]);
@@ -159,7 +170,8 @@ public class NodeServiceImpl implements NodeService {
 
     // 创建节点列表
     public void buildNodeList() {
-        nodeList = nodeInfo.getNodeList();
+        Node me = nodeInfo.getMe();
+        List<Node> nodeList = nodeInfo.getNodeList();
         nodeList.add(me);
         Message request = new Message();
         request.setInitNode_flag(1);
@@ -179,6 +191,8 @@ public class NodeServiceImpl implements NodeService {
 
     // 更新其它节点的nodeList
     public void updateOthersList() {
+        Node me = nodeInfo.getMe();
+        List<Node> nodeList = nodeInfo.getNodeList();
         Message request = new Message();
         request.setInitNode_flag(1);
         request.setInitInfo("updateList/"+me.getID()+"/"+me.getIP()+"/"+me.getPort());
@@ -192,6 +206,7 @@ public class NodeServiceImpl implements NodeService {
 
     // 通过当前节点的路由表查询某个NID的前继节点
     public Node find_predecessor(int id){
+        Node me = nodeInfo.getMe();
         Node n = me;
         FingerTable[] finger = nodeInfo.getFinger();
         int myID = n.getID();
@@ -259,6 +274,7 @@ public class NodeServiceImpl implements NodeService {
     // 获取当前节点路由表中距离目标id最近的节点
     public Node closet_preceding_finger(int id)
     {
+        Node me = nodeInfo.getMe();
         int normalInterval = 1;
         int myID = me.getID();
         if (myID >= id) {
@@ -282,20 +298,24 @@ public class NodeServiceImpl implements NodeService {
 
     // 广播消息
     public void noticeOthers(String message) {
+        Node me = nodeInfo.getMe();
+        List<Node> nodeList = nodeInfo.getNodeList();
         Message request = new Message();
         request.setInitNode_flag(1);
         request.setInitInfo(message);
         Iterator<Node> iterator = nodeList.iterator();
         while(iterator.hasNext()) {
             Node node =iterator.next();
-            if(node==me)
+            if (node == me) {
                 continue;
+            }
             makeConnection.makeConnectionByObject(node.getIP(),node.getPort(),request);
         }
         System.out.println("已通知所有节点");
     }
 
     public String loadNode(){
+        List<Node> nodeList = nodeInfo.getNodeList();
         Node node;
         String results="";
         for (int i = 0; i < nodeList.size() - 1; i++) {
@@ -311,17 +331,21 @@ public class NodeServiceImpl implements NodeService {
      * 分 单个节点、两个节点、多个节点 退出3种情况
      */
     public void beforeExit() {
+        Node me = nodeInfo.getMe();
+        List<Node> nodeList = nodeInfo.getNodeList();
         if (nodeList.size() == 1) {
             // 节点退出时，删除数据表
-            deleteTable(me.getID());
-            System.out.println("\n" + "已删除数据表【node" + me.getID() + "】");
+            System.out.println("准备删除数据表...");
+            dataBase.deleteTable(me.getID());
+            System.out.println("成功删除数据表【node" + me.getID() + "】");
             System.out.println("【系统提示】- 节点 " + me.getID() + " 已经退出DHT网络");
             System.out.println("【系统提示】- 网络已关闭");
         } else {
+            System.out.println("准备删除数据表,并更新其他节点路由表...");
             FingerTable[] finger = nodeInfo.getFinger();
             Node pred = nodeInfo.getPred();
             // 数据迁移到后继节点
-            transferAll(me.getID(), finger[1].getSuccessor().getID());
+            dataBase.transferAll(me.getID(), finger[1].getSuccessor().getID());
             Message request = new Message();
             request.setInitNode_flag(1);
             if (nodeList.size() == 2)
@@ -330,8 +354,8 @@ public class NodeServiceImpl implements NodeService {
                 request.setInitInfo("quitOfManyNodes/" + pred.getID() + "/" + pred.getIP() + "/" + pred.getPort());
             makeConnection.makeConnectionByObject(finger[1].getSuccessor().getIP(), finger[1].getSuccessor().getPort(), request);
             // 删除数据表
-            deleteTable(me.getID());
-            System.out.println("\n" + "已删除数据表【node" + me.getID() + "】");
+            dataBase.deleteTable(me.getID());
+            System.out.println("成功删除数据表【node" + me.getID() + "】");
             System.out.println("【系统提示】- 节点 " + me.getID() + " 已经退出DHT网络");
         }
     }

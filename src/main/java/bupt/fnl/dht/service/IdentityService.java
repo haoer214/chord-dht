@@ -1,18 +1,6 @@
 package bupt.fnl.dht.service;
 
 import bupt.fnl.dht.domain.Message;
-import bupt.fnl.dht.domain.Node;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import org.app.chaincode.authority.QueryAuthority;
-import org.app.chaincode.hash.InvokeHash;
-import org.app.chaincode.hash.QueryHash;
-
-import static bupt.fnl.dht.jdbc.DataBase.*;
-import static bupt.fnl.dht.jdbc.DataBase.resolveData;
-import static bupt.fnl.dht.utils.Decryption.decrypt;
-import static bupt.fnl.dht.utils.Decryption.digest;
-import static bupt.fnl.dht.utils.Hash.HashFunc;
 
 /**
  * 对收到的Message进行鉴权

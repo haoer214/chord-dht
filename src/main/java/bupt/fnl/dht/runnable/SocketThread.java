@@ -2,6 +2,8 @@ package bupt.fnl.dht.runnable;
 
 import bupt.fnl.dht.domain.Message;
 import bupt.fnl.dht.service.IdentityService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -10,11 +12,11 @@ import java.net.Socket;
 public class SocketThread implements Runnable {
 
     private Socket connection;
-
     private IdentityService identityService;
 
-    public SocketThread(Socket connection) {
+    public SocketThread(Socket connection, IdentityService identityService) {
         this.connection = connection;
+        this.identityService = identityService;
     }
 
     @Override

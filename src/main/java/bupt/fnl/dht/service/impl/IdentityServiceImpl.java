@@ -4,6 +4,7 @@ import bupt.fnl.dht.domain.Message;
 import bupt.fnl.dht.domain.Node;
 import bupt.fnl.dht.domain.NodeInfo;
 import bupt.fnl.dht.network.MakeConnection;
+import bupt.fnl.dht.dao.DataBase;
 import bupt.fnl.dht.service.IdentityService;
 import bupt.fnl.dht.service.NodeService;
 import net.sf.json.JSONArray;
@@ -11,20 +12,23 @@ import net.sf.json.JSONObject;
 import org.app.chaincode.authority.QueryAuthority;
 import org.app.chaincode.hash.InvokeHash;
 import org.app.chaincode.hash.QueryHash;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import static bupt.fnl.dht.jdbc.DataBase.*;
-import static bupt.fnl.dht.jdbc.DataBase.resolveData;
 import static bupt.fnl.dht.utils.Decryption.decrypt;
 import static bupt.fnl.dht.utils.Decryption.digest;
 import static bupt.fnl.dht.utils.Hash.HashFunc;
 
+@Service("identityService")
 public class IdentityServiceImpl implements IdentityService {
-
+    @Autowired
     NodeInfo nodeInfo;
-
+    @Autowired
     NodeService nodeService;
-
+    @Autowired
     MakeConnection makeConnection;
+    @Autowired
+    DataBase dataBase;
 
     /* 收到Web消息后进行一系列权限校验 */
     public Message authentication(Message received_message) {
@@ -145,12 +149,12 @@ public class IdentityServiceImpl implements IdentityService {
         Node me = nodeInfo.getMe();
         if (targetNode.getID() == me.getID()) {
             // 判断标识是否已被注册
-            if (ifExist(me.getID(), identity)) {
+            if (dataBase.ifExist(me.getID(), identity)) {
                 System.out.println("当前标识已被注册！");
                 message.setFeedback("当前标识已被注册！");
             } else {
                 // 添加到本地节点数据库列表
-                registerData(me.getID(), kid, identity, mappingData);
+                dataBase.registerData(me.getID(), kid, identity, mappingData);
                 System.out.println("标识映射 " + identity + "->" + mappingData + " 已存入本地数据库");
                 // 将标识、映射数据hash写入区块链
                 String mappingDataHash = digest(mappingData);
@@ -176,12 +180,12 @@ public class IdentityServiceImpl implements IdentityService {
         Node me = nodeInfo.getMe();
         if (targetNode.getID() == me.getID()) {
             // 判断预删除标识是否存在
-            if (!ifExist(me.getID(), identity)) {
+            if (!dataBase.ifExist(me.getID(), identity)) {
                 System.out.println("该标识还未注册，无法删除！");
                 message.setFeedback("该标识还未注册，无法删除！");
             } else {
                 // 删除本地数据库的标识及映射数据
-                deleteData(me.getID(), identity);
+                dataBase.deleteData(me.getID(), identity);
                 System.out.println("标识 " + identity + " 删除成功！");
                 // 删除区块链状态数据库中标识的映射数据hash
                 JSONObject jsonObject = new JSONObject();
@@ -207,12 +211,12 @@ public class IdentityServiceImpl implements IdentityService {
         Node me = nodeInfo.getMe();
         if (targetNode.getID() == me.getID()) {
             // 判断标识是否已被注册
-            if (!ifExist(me.getID(), identity)) {
+            if (!dataBase.ifExist(me.getID(), identity)) {
                 System.out.println("该标识还未注册，无法更新！");
                 message.setFeedback("该标识还未注册，无法更新！");
             } else {
                 // 更新本地节点数据库列表
-                updateData(me.getID(), identity, mappingData);
+                dataBase.updateData(me.getID(), identity, mappingData);
                 System.out.println("标识映射 " + identity + "->" + mappingData + " 已更新至本地数据库");
                 // 更新区块链状态数据库中标识的映射数据hash
                 String mappingDataHash = digest(mappingData);
@@ -239,7 +243,7 @@ public class IdentityServiceImpl implements IdentityService {
             // 从本地数据库获取内容
 //            System.out.println((resolveData("select *" + " from node" + me.getID() + " where Identity='" + identity + "';"))
 //                    .replaceAll("#", "\n"));
-            String result = resolveData(me.getID(), identity);
+            String result = dataBase.resolveData(me.getID(), identity);
             if (result.equals("")) {
                 System.out.println("该标识不存在！");
                 message.setFeedback("该标识不存在！");

@@ -1,12 +1,13 @@
 package bupt.fnl.dht.domain;
 
-import bupt.fnl.dht.network.MakeConnection;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 /**
  * 封装节点各种信息的实体类
  */
+@Component("nodeInfo")
 public class NodeInfo {
 
     private String knownHostIP;     // 已知节点IP

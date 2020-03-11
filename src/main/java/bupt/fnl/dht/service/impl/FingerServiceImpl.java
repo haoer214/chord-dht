@@ -5,27 +5,31 @@ import bupt.fnl.dht.domain.Message;
 import bupt.fnl.dht.domain.Node;
 import bupt.fnl.dht.domain.NodeInfo;
 import bupt.fnl.dht.network.MakeConnection;
+import bupt.fnl.dht.dao.DataBase;
 import bupt.fnl.dht.service.FingerService;
 import bupt.fnl.dht.service.NodeService;
 import bupt.fnl.dht.service.Print;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static bupt.fnl.dht.jdbc.DataBase.*;
-
+@Service("fingerService")
 public class FingerServiceImpl implements FingerService {
-
+    @Autowired
     NodeInfo nodeInfo;
-
     int m, numDHT;
     Node me, pred;
     List<Node> nodeList;
     FingerTable[] finger;
-
+    @Autowired
     NodeService nodeService;
+    @Autowired
     MakeConnection makeConnection;
+    @Autowired
+    DataBase dataBase;
+    @Autowired
     Print print;
     /**
      * initTable - 初始化数据库、路由表
@@ -39,31 +43,28 @@ public class FingerServiceImpl implements FingerService {
         pred = nodeInfo.getPred();
         finger = nodeInfo.getFinger();
 
-        try {
-            initParam(); // 初始化数据库连接信息
-        } catch (IOException e) {
-            System.out.println("数据库连接失败，请尝试重新连接...");
-            System.exit(1);
-        }
+
+        dataBase.initParam(); // 初始化数据库连接信息
 
         try {
-            createTable(me.getID()); // 创建表
-            System.out.println("成功创建表【node" + me.getID() + "】");
+            dataBase.createTable(me.getID()); // 创建表
+            System.out.println("成功创建数据库表【node" + me.getID() + "】");
         } catch (Exception e) {
             System.out.println("表创建失败，请重新创建...");
             System.exit(1);
         }
 
+        System.out.println();
         System.out.println("正在创建路由表...");
         for (int i = 1; i <= m; i++) {
             finger[i] = new FingerTable();
             finger[i].setStart((me.getID() + (int)Math.pow(2,i-1)) % numDHT);
-            if (i == m)
-                finger[i].setInterval(finger[i].getStart(),finger[1].getStart()-1);
-            else
-                finger[i].setInterval(finger[i].getStart(),finger[i+1].getStart());
             finger[i].setSuccessor(me);
         }
+        for (int i = 1; i < m; i++) {
+            finger[i].setInterval(finger[i].getStart(),finger[i+1].getStart());
+        }
+        finger[m].setInterval(finger[m].getStart(),finger[1].getStart()-1);
 
 
         if (args.length == 2) {
@@ -94,7 +95,7 @@ public class FingerServiceImpl implements FingerService {
             }
             // 将部分数据从后继迁移到当前节点
             try {
-                transferPart(me.getID(), finger[1].getSuccessor().getID());
+                dataBase.transferPart(me.getID(), finger[1].getSuccessor().getID());
             } catch (Exception e) {
                 System.out.println("节点加入时，数据迁移失败！");
                 System.exit(1);

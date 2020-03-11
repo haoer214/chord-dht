@@ -6,7 +6,8 @@ import bupt.fnl.dht.domain.Message;
 import bupt.fnl.dht.domain.NodeInfo;
 import bupt.fnl.dht.service.FingerService;
 import bupt.fnl.dht.service.NodeService;
-import bupt.fnl.dht.service.Print;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -16,10 +17,14 @@ import java.net.Socket;
 /**
  * 基于 TCP 的 Socket 通信
  */
+@Service
 public class MakeConnection {
 
+    @Autowired
     NodeInfo nodeInfo;
+    @Autowired
     NodeService nodeService;
+    @Autowired
     FingerService fingerService;
 
     // 节点间通过序列化对象Object来传输数据

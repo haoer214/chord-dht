@@ -1,30 +1,36 @@
-package bupt.fnl.dht.jdbc;
+package bupt.fnl.dht.dao.impl;
 
 import bupt.fnl.dht.dao.IdentityDao;
 import bupt.fnl.dht.domain.Identity;
 import bupt.fnl.dht.domain.Vo;
+import bupt.fnl.dht.dao.DataBase;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * 使用jdbc实现与mysql数据库的交互
- */
+@Repository("dataBase")
+public class DataBaseImpl implements DataBase {
 
-public class DataBase {
+    private IdentityDao identityDao;
+    private SqlSession sqlSession;
+    private Vo vo = new Vo();
+    private Identity identity = new Identity();
 
-    private static IdentityDao identityDao;
-    private static SqlSession sqlSession;
-    private static Vo vo = new Vo();
-    private static Identity identity = new Identity();
-
-    public static void initParam() throws IOException {
+    public void initParam() {
         // 1、读取配置文件
-        InputStream in = Resources.getResourceAsStream("SqlMapConfig.xml");
+        InputStream in = null;
+        try {
+            in = Resources.getResourceAsStream("SqlMapConfig.xml");
+        } catch (IOException e) {
+            System.out.println("配置文件读取失败！");
+            System.exit(1);
+        }
         // 2、创建SqlSessionFactory工厂
         SqlSessionFactory factory = new SqlSessionFactoryBuilder().build(in);
         // 3、使用工厂生产SqlSession对象
@@ -36,13 +42,13 @@ public class DataBase {
     }
 
     // 节点加入时，创建数据表node[i]（i表示节点ID）
-    public static void createTable(int nodeID) {
+    public void createTable(int nodeID) {
         vo.setCurNode("node"+nodeID);
         identityDao.createTable(vo);
     }
 
     // 节点加入时，部分数据从后继迁移到新节点
-    public static void transferPart(int newNode, int sucNode) {
+    public void transferPart(int newNode, int sucNode) {
         vo.setCurNode("node"+newNode);
         vo.setSucNode("node"+sucNode);
         vo.setCurHash(newNode);
@@ -53,7 +59,7 @@ public class DataBase {
     }
 
     // 节点退出时，数据迁移到后继节点
-    public static void transferAll(int newNode, int sucNode) {
+    public void transferAll(int newNode, int sucNode) {
         vo.setCurNode("node"+newNode);
         vo.setSucNode("node"+sucNode);
         identityDao.transferAll(vo);
@@ -61,20 +67,20 @@ public class DataBase {
     }
 
     // 节点退出时，删除数据表node[i]（i表示节点ID）
-    public static void deleteTable(int nodeID) {
+    public void deleteTable(int nodeID) {
         vo.setCurNode("node"+nodeID);
         identityDao.deleteTable(vo);
     }
 
     // 判断标识是否已被注册
-    public static boolean ifExist(int nodeID, String identifier) {
+    public boolean ifExist(int nodeID, String identifier) {
         vo.setCurNode("node"+nodeID);
         identity.setIdentifier(identifier);
         return identityDao.findData(vo)!=null;
     }
 
     // 添加数据 [hash, identifier, mappingData]
-    public static void registerData(int nodeID, int hash, String identifier, String mappingData) {
+    public void registerData(int nodeID, int hash, String identifier, String mappingData) {
         vo.setCurNode("node"+nodeID);
         identity.setHash(hash);
         identity.setIdentifier(identifier);
@@ -84,7 +90,7 @@ public class DataBase {
     }
 
     // 删除数据 [hash, identifier, mappingData]
-    public static void deleteData(int nodeID, String identifier) {
+    public void deleteData(int nodeID, String identifier) {
         vo.setCurNode("node"+nodeID);
         identity.setIdentifier(identifier);
         identityDao.deleteData(vo);
@@ -92,7 +98,7 @@ public class DataBase {
     }
 
     // 更新数据 [hash, identifier, mappingData]
-    public static void updateData(int nodeID, String identifier, String mappingData) {
+    public void updateData(int nodeID, String identifier, String mappingData) {
         vo.setCurNode("node"+nodeID);
         identity.setIdentifier(identifier);
         identity.setMappingData(mappingData);
@@ -101,7 +107,7 @@ public class DataBase {
     }
 
     // 通过标识解析数据 [hash, identifier, mappingData]
-    public static String resolveData(int nodeID, String identifier) {
+    public String resolveData(int nodeID, String identifier) {
         vo.setCurNode("node"+nodeID);
         identity.setIdentifier(identifier);
         return identityDao.findData(vo).getMappingData();
