@@ -19,10 +19,6 @@ import java.util.List;
 public class FingerServiceImpl implements FingerService {
     @Autowired
     NodeInfo nodeInfo;
-    int m, numDHT;
-    Node me, pred;
-    List<Node> nodeList;
-    FingerTable[] finger;
     @Autowired
     NodeService nodeService;
     @Autowired
@@ -37,12 +33,11 @@ public class FingerServiceImpl implements FingerService {
      */
     public void initTable(String... args){
 
-        m = nodeInfo.getM();
-        numDHT = nodeInfo.getNumDHT();
-        me = nodeInfo.getMe();
-        pred = nodeInfo.getPred();
-        finger = nodeInfo.getFinger();
-
+        int m = nodeInfo.getM();
+        int numDHT = nodeInfo.getNumDHT();
+        Node me = nodeInfo.getMe();
+        Node pred = nodeInfo.getPred();
+        FingerTable[] finger = nodeInfo.getFinger();
 
         dataBase.initParam(); // 初始化数据库连接信息
 
@@ -71,7 +66,7 @@ public class FingerServiceImpl implements FingerService {
             System.out.println("路由表创建完成，此节点是网络中唯一节点！");
             print.printFingerInfo();
             System.out.println("开始创建节点列表...");
-            nodeList = new ArrayList<>();
+            List<Node> nodeList = new ArrayList<>();
             nodeList.add(me);
             nodeInfo.setNodeList(nodeList);
             System.out.println("节点列表创建完成！");
@@ -90,7 +85,7 @@ public class FingerServiceImpl implements FingerService {
                 nodeService.updateOthersList();
                 System.out.println("其它节点的列表已更新。");
             } catch (Exception e) {
-                System.out.println("路由表创建失败...");
+                System.out.println("路由表或节点列表创建失败!");
                 System.exit(1);
             }
             // 将部分数据从后继迁移到当前节点
@@ -109,6 +104,11 @@ public class FingerServiceImpl implements FingerService {
 
     // 初始化路由表
     public void init_finger_table(Node n) {
+        int m = nodeInfo.getM();
+        int numDHT = nodeInfo.getNumDHT();
+        Node me = nodeInfo.getMe();
+        Node pred = nodeInfo.getPred();
+        FingerTable[] finger = nodeInfo.getFinger();
         int myID, nextID;
 
         Message request = new Message();
@@ -164,6 +164,9 @@ public class FingerServiceImpl implements FingerService {
 
     // 更新影响到节点的路由表（波及到的节点范围：向前1～2^m-1）
     public void update_others() {
+        int m = nodeInfo.getM();
+        int numDHT = nodeInfo.getNumDHT();
+        Node me = nodeInfo.getMe();
         Node p;
         for (int i = 1; i <= m; i++) {
             int id = me.getID() - (int)Math.pow(2,i-1) + 1;
@@ -174,13 +177,15 @@ public class FingerServiceImpl implements FingerService {
 
             Message request = new Message();
             request.setInitNode_flag(1);
-            request.setInitInfo("updateFing/" + me.getID() + "/" + me.getIP() + "/" + me.getPort() + "/" + i);
+            request.setInitInfo("updateFinger/" + me.getID() + "/" + me.getIP() + "/" + me.getPort() + "/" + i);
             makeConnection.makeConnectionByObject(p.getIP(),p.getPort(),request);
         }
     }
     // 更新路由表
-    public void update_finger_table(Node s, int i)
-    {
+    public void update_finger_table(Node s, int i) {
+        Node me = nodeInfo.getMe();
+        Node pred = nodeInfo.getPred();
+        FingerTable[] finger = nodeInfo.getFinger();
         Node p;
         int normalInterval;
         int myID = me.getID();
@@ -199,16 +204,19 @@ public class FingerServiceImpl implements FingerService {
 
             Message request = new Message();
             request.setInitNode_flag(1);
-            request.setInitInfo("updateFing/" + s.getID() + "/" + s.getIP() + "/" + s.getPort() + "/" + i);
+            request.setInitInfo("updateFinger/" + s.getID() + "/" + s.getIP() + "/" + s.getPort() + "/" + i);
             makeConnection.makeConnectionByObject(p.getIP(),p.getPort(),request);
         }
     }
 
     public void quit_update_finger_table(Node s, int exitID){
+        int m = nodeInfo.getM();
+        FingerTable[] finger = nodeInfo.getFinger();
         for(int i = 1; i <= m; i++){
             if (finger[i].getSuccessor().getID() == exitID){
                 finger[i].setSuccessor(s);
             }
         }
     }
+
 }

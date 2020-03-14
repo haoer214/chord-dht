@@ -42,9 +42,9 @@ public class NodeDHT {
         Print print = (Print) context.getBean("print");
 
         System.out.println("*************启动DHT网络************");
-        nodeService.initNode(args);
+        nodeService.initNode(args); // 初始化节点信息
         System.out.println("本节点 ID: " + nodeInfo.getMe().getID() + "  前继节点 ID: " + nodeInfo.getPred().getID());
-        fingerService.initTable(args);
+        fingerService.initTable(args); // 初始化路由表信息
 
         // 线程池
         ExecutorService threadPool = Executors.newCachedThreadPool();

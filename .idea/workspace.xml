@@ -1,38 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="ArtifactsWorkspaceSettings">
+    <artifacts-to-build>
+      <artifact name="chord-dht:jar" />
+    </artifacts-to-build>
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="0d72f00e-b645-41c7-8586-ce7918ca9e89" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/config/Config.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/dao/DataBase.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/dao/impl/DataBaseImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/artifacts/chord_dht_jar.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/chord_dht_jar/chord-dht.jar" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/chord_dht_jar/chord-dht.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/domain/NodeInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/domain/NodeInfo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/jdbc/DataBase.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/network/MakeConnection.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/network/MakeConnection.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/network/NodeDHT.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/network/NodeDHT.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/runnable/CommandThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/runnable/CommandThread.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/runnable/SocketThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/runnable/SocketThread.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/service/IdentityService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/service/IdentityService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/service/impl/FingerServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/service/impl/FingerServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/service/impl/IdentityServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/service/impl/IdentityServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/service/impl/NodeServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/service/impl/NodeServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/service/impl/PrintImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/bupt/fnl/dht/service/impl/PrintImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/SqlMapConfig.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/SqlMapConfig.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/chord-dht-1.0-SNAPSHOT-jar-with-dependencies.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/chord-dht-1.0-SNAPSHOT.jar" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/SqlMapConfig.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SqlMapConfig.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/dao/IdentityDao.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/dao/IdentityDao.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/dao/IdentityDao.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/dao/IdentityDao.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/domain/Identity.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/domain/Identity.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/domain/NodeVo.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/jdbc/DataBase.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/network/Communication.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/dao/impl/DataBaseImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/dao/impl/DataBaseImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/network/MakeConnection.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/network/MakeConnection.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/network/NodeDHT.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/network/NodeDHT.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/node/FingerTable.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/node/Node.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/utils/Hash.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/utils/Hash.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/utils/Message.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/bupt/fnl/dht/dao/IdentityDaoTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/bupt/fnl/dht/dao/IdentityDaoTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/runnable/SocketThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/runnable/SocketThread.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/service/impl/FingerServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/service/impl/FingerServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/service/impl/NodeServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/bupt/fnl/dht/service/impl/NodeServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-archiver/pom.properties" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-archiver/pom.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,6 +66,10 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="project.structure.last.edited" value="Artifacts" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
   </component>
   <component name="RecentsManager">
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
@@ -114,7 +114,9 @@
       <workItem from="1583120777297" duration="679000" />
       <workItem from="1583659562008" duration="9147000" />
       <workItem from="1583745536473" duration="48000" />
-      <workItem from="1583745601028" duration="34364000" />
+      <workItem from="1583745601028" duration="40234000" />
+      <workItem from="1584011345160" duration="1795000" />
+      <workItem from="1584083118617" duration="7342000" />
     </task>
     <servers />
   </component>
@@ -139,18 +141,22 @@
       <screen x="0" y="0" width="1440" height="900" />
     </state>
     <state x="458" y="212" key="#com.intellij.codeInsight.editorActions.RestoreReferencesDialog/0.0.1440.900@0.0.1440.900" timestamp="1583815145121" />
-    <state x="184" y="112" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1583892169652">
+    <state x="184" y="112" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1583925641942">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state x="184" y="112" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1440.900@0.0.1440.900" timestamp="1583892169652" />
+    <state x="184" y="112" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1440.900@0.0.1440.900" timestamp="1583925641942" />
     <state x="507" y="162" key="#com.intellij.ide.macro.MacrosDialog" timestamp="1583892109390">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
     <state x="507" y="162" key="#com.intellij.ide.macro.MacrosDialog/0.0.1440.900@0.0.1440.900" timestamp="1583892109390" />
-    <state x="533" y="166" key="#com.intellij.ide.util.MemberChooser" timestamp="1583898636855">
+    <state x="533" y="166" key="#com.intellij.ide.util.MemberChooser" timestamp="1583900020289">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state x="533" y="166" key="#com.intellij.ide.util.MemberChooser/0.0.1440.900@0.0.1440.900" timestamp="1583898636855" />
+    <state x="533" y="166" key="#com.intellij.ide.util.MemberChooser/0.0.1440.900@0.0.1440.900" timestamp="1583900020289" />
+    <state x="458" y="209" key="#com.intellij.ide.util.TreeClassChooserDialog" timestamp="1583926790364">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state x="458" y="209" key="#com.intellij.ide.util.TreeClassChooserDialog/0.0.1440.900@0.0.1440.900" timestamp="1583926790364" />
     <state x="325" y="382" key="#com.intellij.refactoring.move.MoveHandler.SelectRefactoringDialog" timestamp="1583850012598">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
@@ -167,26 +173,30 @@
       <screen x="0" y="0" width="1440" height="900" />
     </state>
     <state x="458" y="204" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1440.900@0.0.1440.900" timestamp="1583842131063" />
-    <state width="1398" height="245" key="GridCell.Tab.0.bottom" timestamp="1583899868666">
+    <state width="1398" height="245" key="GridCell.Tab.0.bottom" timestamp="1583926196889">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1398" height="245" key="GridCell.Tab.0.bottom/0.0.1440.900@0.0.1440.900" timestamp="1583899868666" />
-    <state width="1398" height="245" key="GridCell.Tab.0.center" timestamp="1583899868664">
+    <state width="1398" height="245" key="GridCell.Tab.0.bottom/0.0.1440.900@0.0.1440.900" timestamp="1583926196889" />
+    <state width="1398" height="245" key="GridCell.Tab.0.center" timestamp="1583926196887">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1398" height="245" key="GridCell.Tab.0.center/0.0.1440.900@0.0.1440.900" timestamp="1583899868664" />
-    <state width="1398" height="245" key="GridCell.Tab.0.left" timestamp="1583899868664">
+    <state width="1398" height="245" key="GridCell.Tab.0.center/0.0.1440.900@0.0.1440.900" timestamp="1583926196887" />
+    <state width="1398" height="245" key="GridCell.Tab.0.left" timestamp="1583926196882">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1398" height="245" key="GridCell.Tab.0.left/0.0.1440.900@0.0.1440.900" timestamp="1583899868664" />
-    <state width="1398" height="245" key="GridCell.Tab.0.right" timestamp="1583899868665">
+    <state width="1398" height="245" key="GridCell.Tab.0.left/0.0.1440.900@0.0.1440.900" timestamp="1583926196882" />
+    <state width="1398" height="245" key="GridCell.Tab.0.right" timestamp="1583926196888">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1398" height="245" key="GridCell.Tab.0.right/0.0.1440.900@0.0.1440.900" timestamp="1583899868665" />
+    <state width="1398" height="245" key="GridCell.Tab.0.right/0.0.1440.900@0.0.1440.900" timestamp="1583926196888" />
     <state x="308" y="192" key="IDE.errors.dialog" timestamp="1583899778891">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
     <state x="308" y="192" key="IDE.errors.dialog/0.0.1440.900@0.0.1440.900" timestamp="1583899778891" />
+    <state x="208" y="23" width="1024" height="790" key="SettingsEditor" timestamp="1583926800356">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state x="208" y="23" width="1024" height="790" key="SettingsEditor/0.0.1440.900@0.0.1440.900" timestamp="1583926800356" />
     <state x="458" y="220" key="extract.method.dialog" timestamp="1583737601586">
       <screen x="0" y="0" width="1440" height="900" />
     </state>

@@ -16,19 +16,13 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service("nodeService")
 public class NodeServiceImpl implements NodeService {
 
     @Autowired
     NodeInfo nodeInfo;
-    String knownIP, knownPort;
-    @Autowired
-    NodeService nodeService;
     @Autowired
     MakeConnection makeConnection;
     @Autowired
@@ -56,11 +50,8 @@ public class NodeServiceImpl implements NodeService {
             nodeInfo.setPred(me);
 
         } else if(args.length == 4){
-
-            knownIP = args[0];
-            knownPort = args[1];
-            nodeInfo.setKnownHostIP(knownIP);
-            nodeInfo.setKnownHostPort(knownPort);
+            nodeInfo.setKnownHostIP(args[0]);
+            nodeInfo.setKnownHostPort(args[1]);
             String myPort = args[2];
             nodeInfo.setMyPort(myPort);
             Node me = getCurrentNode(Integer.parseInt(args[3]));
@@ -69,7 +60,7 @@ public class NodeServiceImpl implements NodeService {
             Message request = new Message();
             request.setInitNode_flag(1);
             request.setInitInfo("findPred/" + nodeInfo.getMyID());
-            Message result = makeConnection.makeConnectionByObject(knownIP, knownPort, request);
+            Message result = makeConnection.makeConnectionByObject(args[0], args[1], request);
             String[] tokens = result.getInitInfo().split("/");
             Node pred = new Node(Integer.parseInt(tokens[0]),tokens[1],tokens[2]);
             nodeInfo.setPred(pred);
@@ -111,7 +102,7 @@ public class NodeServiceImpl implements NodeService {
         // 当前节点端口
         String myPort = nodeInfo.getMyPort();
         // 当前节点 ID
-        int myID = nodeService.getNodeID(myIP,myPort);
+        int myID = getNodeID(myIP,myPort);
         nodeInfo.setMyID(myID);
         return new Node(myID,myIP,myPort);
     }
@@ -119,8 +110,6 @@ public class NodeServiceImpl implements NodeService {
 
     // 获取新加入网络的节点ID
     public int getNodeID(String nodeIP, String nodePort) {
-
-        List<Node> nodeList = nodeInfo.getNodeList();
 
         int nodeID;
 
@@ -133,22 +122,22 @@ public class NodeServiceImpl implements NodeService {
             BigInteger hashNum = new BigInteger(1, hashBytes);
             nodeID = Math.abs(hashNum.intValue()) % nodeInfo.getNumDHT();
 
-            System.out.println("新节点加入... ");
-
-            if (nodeList == null) // 说明是第一个节点
-                return nodeID;
-
-            // 判断节点hash是否重复
-            Set<Integer> nodesIDSet = new HashSet<>();
-            nodeList.forEach(node -> nodesIDSet.add(node.getID()));
-
-            while (nodesIDSet.contains(nodeID)) {
-                md.reset();
-                md.update(hashBytes);
-                hashBytes = md.digest();
-                hashNum = new BigInteger(1, hashBytes);
-                nodeID = Math.abs(hashNum.intValue()) % nodeInfo.getNumDHT();
+            if (nodeInfo.getKnownHostIP() != null) {
+                Message request = new Message();
+                request.setInitNode_flag(1);
+                request.setInitInfo("findSucOfPred/"+nodeID);
+                // 判断节点hash是否重复
+                while(Integer.parseInt(makeConnection.makeConnectionByObject(nodeInfo.getKnownHostIP(), nodeInfo.getKnownHostPort(), request).getInitInfo())==nodeID) {
+                    md.reset();
+                    md.update(hashBytes);
+                    hashBytes = md.digest();
+                    hashNum = new BigInteger(1,hashBytes);
+                    nodeID = Math.abs(hashNum.intValue()) % nodeInfo.getNumDHT();
+                    request.setInitInfo("findSucOfPred/"+nodeID);
+                }
             }
+
+            System.out.println("新节点加入... ");
             return nodeID;
 
         } catch (NoSuchAlgorithmException e) {
@@ -157,27 +146,34 @@ public class NodeServiceImpl implements NodeService {
         }
     }
 
+    // 创建节点列表
+    public void buildNodeList() {
+        Node me = nodeInfo.getMe();
+        List<Node> nodeList = new ArrayList<>();
+        nodeList.add(me);
+        nodeInfo.setNodeList(nodeList);
+        Message request = new Message();
+        request.setInitNode_flag(1);
+        request.setInitInfo("load/");
+        Message result = makeConnection.makeConnectionByObject(nodeInfo.getKnownHostIP(), nodeInfo.getKnownHostPort(), request);
+        getNode(result.getInitInfo());
+    }
+
+    // 从其他节点列表获取节点信息
+    public String loadNode(){
+        List<Node> nodeList = nodeInfo.getNodeList();
+        StringBuilder results = new StringBuilder();
+        nodeList.forEach(node -> results.append(node.getID()).append("/").append(node.getIP()).append("/").append(node.getPort()).append("/"));
+        return results.toString();
+    }
     // 处理返回的m个node信息并生成list(路由表中最多只有m个node)
     public void getNode(String str) {
         String[] tokens = str.split("/");
         List<Node> nodeList = nodeInfo.getNodeList();
-        Node newNode;
         for (int i = 1; i <= (tokens.length / 3); i++) {
-            newNode = new Node(Integer.parseInt(tokens[3 * (i - 1)]), tokens[1 + 3 * (i - 1)], tokens[2 + 3 * (i - 1)]);
+            Node newNode = new Node(Integer.parseInt(tokens[3 * (i - 1)]), tokens[1 + 3 * (i - 1)], tokens[2 + 3 * (i - 1)]);
             nodeList.add(newNode);
         }
-    }
-
-    // 创建节点列表
-    public void buildNodeList() {
-        Node me = nodeInfo.getMe();
-        List<Node> nodeList = nodeInfo.getNodeList();
-        nodeList.add(me);
-        Message request = new Message();
-        request.setInitNode_flag(1);
-        request.setInitInfo("load/");
-        Message result = makeConnection.makeConnectionByObject(knownIP, knownPort, request);
-        getNode(result.getInitInfo());
     }
 
 
@@ -207,9 +203,8 @@ public class NodeServiceImpl implements NodeService {
     // 通过当前节点的路由表查询某个NID的前继节点
     public Node find_predecessor(int id){
         Node me = nodeInfo.getMe();
-        Node n = me;
         FingerTable[] finger = nodeInfo.getFinger();
-        int myID = n.getID();
+        int myID = me.getID();
         int succID = finger[1].getSuccessor().getID();
         int normalInterval = 1;
         if (myID >= succID)
@@ -221,15 +216,15 @@ public class NodeServiceImpl implements NodeService {
             Message request = new Message();
             request.setInitNode_flag(1);
             request.setInitInfo("closetPred/" + id);
-            Message result = makeConnection.makeConnectionByObject(n.getIP(),n.getPort(),request);
+            Message result = makeConnection.makeConnectionByObject(me.getIP(),me.getPort(),request);
             String[] tokens = result.getInitInfo().split("/");
 
-            n = new Node(Integer.parseInt(tokens[0]),tokens[1],tokens[2]);
+            me = new Node(Integer.parseInt(tokens[0]),tokens[1],tokens[2]);
 
-            myID = n.getID();
+            myID = me.getID();
 
             request.setInitInfo("getSuc/");
-            Message result2 = makeConnection.makeConnectionByObject(n.getIP(),n.getPort(),request);
+            Message result2 = makeConnection.makeConnectionByObject(me.getIP(),me.getPort(),request);
             String[] tokens2 = result2.getInitInfo().split("/");
 
             succID = Integer.parseInt(tokens2[0]);
@@ -239,7 +234,7 @@ public class NodeServiceImpl implements NodeService {
             else
                 normalInterval = 1;
         }
-        return n;
+        return me;
     }
     // 通过当前节点的路由表查询某个NID的后继节点
     public Node find_successor(int id) {
@@ -294,8 +289,6 @@ public class NodeServiceImpl implements NodeService {
         return me;
     }
 
-
-
     // 广播消息
     public void noticeOthers(String message) {
         Node me = nodeInfo.getMe();
@@ -314,17 +307,6 @@ public class NodeServiceImpl implements NodeService {
         System.out.println("已通知所有节点");
     }
 
-    public String loadNode(){
-        List<Node> nodeList = nodeInfo.getNodeList();
-        Node node;
-        String results="";
-        for (int i = 0; i < nodeList.size() - 1; i++) {
-            node = nodeList.get(i);
-            results = results + node.getID() + "/" + node.getIP() + "/" + node.getPort() + "/";
-        }
-        results = results + nodeList.get(nodeList.size() - 1).getID() + "/" + nodeList.get(nodeList.size() - 1).getIP() + "/" + nodeList.get(nodeList.size() - 1).getPort() + "/";
-        return results;
-    }
 
     /**
      * beforeExit() - 节点退出网络

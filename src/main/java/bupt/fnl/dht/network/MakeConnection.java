@@ -60,10 +60,17 @@ public class MakeConnection {
         Node me = nodeInfo.getMe();
 
         switch (tokens[0]) {
+
             case "setPred": {
                 Node newNode = new Node(Integer.parseInt(tokens[1]), tokens[2], tokens[3]);
                 nodeService.setPredecessor(newNode);
                 outResponse = "set it successfully";
+                break;
+            }
+            case "findPred": {
+                int id = Integer.parseInt(tokens[1]);
+                Node newNode = nodeService.find_predecessor(id);
+                outResponse = newNode.getID() + "/" + newNode.getIP() + "/" + newNode.getPort();
                 break;
             }
             case "getPred": {
@@ -81,12 +88,7 @@ public class MakeConnection {
                 outResponse = newNode.getID() + "/" + newNode.getIP() + "/" + newNode.getPort();
                 break;
             }
-            case "findPred": {
-                int id = Integer.parseInt(tokens[1]);
-                Node newNode = nodeService.find_predecessor(id);
-                outResponse = newNode.getID() + "/" + newNode.getIP() + "/" + newNode.getPort();
-                break;
-            }
+
             // 只有两个节点的退出
             case "quitOfTwoNodes":
                 // 后继节点的列表中删除前继
@@ -106,19 +108,21 @@ public class MakeConnection {
                 // 后继节点的列表中删除前继
                 nodeInfo.getNodeList().remove(pred);
                 // 通知剩余节点删除其前继
-                nodeService.noticeOthers("deleteNodeOfNodelist/" + pred.getID() + "/" + pred.getIP() + "/" + pred.getPort() + "/" + me.getID() + "/" + me.getIP() + "/" + me.getPort() + "/" + pred.getID());
+                nodeService.noticeOthers("deleteNodeOfNodeList/" + pred.getID() + "/" + pred.getIP() + "/" + pred.getPort() + "/" + me.getID() + "/" + me.getIP() + "/" + me.getPort() + "/" + pred.getID());
                 System.out.println("\n" + "【系统提示】- 节点 " + pred.getID() + " 已经退出DHT网络");
                 // 将前继设为删除节点的前继
                 nodeService.setPredecessor(new Node(Integer.parseInt(tokens[1]), tokens[2], tokens[3]));
                 break;
-            case "deleteNodeOfNodelist":
+            case "deleteNodeOfNodeList":
                 Node deleteNode = new Node(Integer.parseInt(tokens[1]), tokens[2], tokens[3]);
                 Node updateNode = new Node(Integer.parseInt(tokens[4]), tokens[5], tokens[6]);
                 nodeInfo.getNodeList().remove(deleteNode);
                 fingerService.quit_update_finger_table(updateNode, Integer.parseInt(tokens[7]));
                 System.out.println("\n" + "【系统提示】- 节点 " + tokens[7] + " 已经退出DHT网络");
                 break;
-
+            case "findSucOfPred":
+                outResponse = Integer.toString(nodeService.find_successor(nodeService.find_predecessor(Integer.parseInt(tokens[1])).getID()).getID());
+                break;
             case "load":
                 outResponse = nodeService.loadNode();
                 break;
@@ -127,12 +131,12 @@ public class MakeConnection {
                 nodeService.updateList(newNode);
                 break;
             }
-//            case "closetPred": {
-//                Node newNode = closet_preceding_finger(Integer.parseInt(tokens[1]));
-//                outResponse = newNode.getID() + "/" + newNode.getIP() + "/" + newNode.getPort();
-//                break;
-//            }
-            case "updateFing": {
+            case "closetPred": {
+                Node newNode = nodeService.closet_preceding_finger(Integer.parseInt(tokens[1]));
+                outResponse = newNode.getID() + "/" + newNode.getIP() + "/" + newNode.getPort();
+                break;
+            }
+            case "updateFinger": {
                 Node newNode = new Node(Integer.parseInt(tokens[1]), tokens[2], tokens[3]);
                 fingerService.update_finger_table(newNode, Integer.parseInt(tokens[4]));
                 outResponse = "update finger " + Integer.parseInt(tokens[4]) + " successfully";
