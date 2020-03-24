@@ -9,6 +9,7 @@ import bupt.fnl.dht.service.IdentityService;
 import bupt.fnl.dht.service.NodeService;
 import bupt.fnl.dht.service.Print;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.IOException;
 import java.net.*;
@@ -28,7 +29,8 @@ public class NodeDHT {
      */
     public static void main(String[] args) {
         // Spring容器
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class); // 基于注解配置
+//        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("bean.xml"); // 基于xml配置
 
         // 节点的各种信息
         NodeInfo nodeInfo = (NodeInfo) context.getBean("nodeInfo");

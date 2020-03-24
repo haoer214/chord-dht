@@ -9,6 +9,7 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,5 +62,12 @@ public class IdentityDaoTest {
         vo.setCurNode("node1");
         identity.setIdentifier("hr_zhao");
         System.out.println(identityDao.findData(vo).getMappingData());
+    }
+    @Test
+    public void testCache(){
+        Jedis jedis = new Jedis("192.168.0.3", 6379);
+        jedis.set("k1", "HaoRan");
+        String result = jedis.get("k2");
+        System.out.println(result);
     }
 }

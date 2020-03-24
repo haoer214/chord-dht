@@ -10,6 +10,8 @@ import bupt.fnl.dht.service.NodeService;
 import bupt.fnl.dht.service.Print;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -27,6 +29,8 @@ public class NodeServiceImpl implements NodeService {
     MakeConnection makeConnection;
     @Autowired
     DataBase dataBase;
+    @Autowired
+    JedisPool jedisPool;
     @Autowired
     Print print;
     /**
@@ -315,6 +319,10 @@ public class NodeServiceImpl implements NodeService {
     public void beforeExit() {
         Node me = nodeInfo.getMe();
         List<Node> nodeList = nodeInfo.getNodeList();
+        // 清空缓存
+        try(Jedis jedis = jedisPool.getResource()){
+            jedis.flushAll();
+        }
         if (nodeList.size() == 1) {
             // 节点退出时，删除数据表
             System.out.println("准备删除数据表...");

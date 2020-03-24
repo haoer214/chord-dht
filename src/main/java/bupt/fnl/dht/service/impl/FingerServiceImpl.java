@@ -36,7 +36,6 @@ public class FingerServiceImpl implements FingerService {
         int m = nodeInfo.getM();
         int numDHT = nodeInfo.getNumDHT();
         Node me = nodeInfo.getMe();
-        Node pred = nodeInfo.getPred();
         FingerTable[] finger = nodeInfo.getFinger();
 
         dataBase.initParam(); // 初始化数据库连接信息
@@ -73,7 +72,7 @@ public class FingerServiceImpl implements FingerService {
 
         } else if(args.length == 4){
             try {
-                init_finger_table(pred);
+                init_finger_table();
                 System.out.println("路由表创建完成！");
                 print.printFingerInfo();
                 update_others();
@@ -103,7 +102,7 @@ public class FingerServiceImpl implements FingerService {
     }
 
     // 初始化路由表
-    public void init_finger_table(Node n) {
+    public void init_finger_table() {
         int m = nodeInfo.getM();
         int numDHT = nodeInfo.getNumDHT();
         Node me = nodeInfo.getMe();
@@ -114,7 +113,7 @@ public class FingerServiceImpl implements FingerService {
         Message request = new Message();
         request.setInitNode_flag(1);
         request.setInitInfo("findSuc/" + finger[1].getStart());
-        Message result = makeConnection.makeConnectionByObject(n.getIP(),n.getPort(),request);
+        Message result = makeConnection.makeConnectionByObject(pred.getIP(),pred.getPort(),request);
 
         String[] tokens = result.getInitInfo().split("/");
         finger[1].setSuccessor(new Node(Integer.parseInt(tokens[0]),tokens[1],tokens[2]));
@@ -122,7 +121,9 @@ public class FingerServiceImpl implements FingerService {
         request.setInitInfo("getPred");
         Message result2 = makeConnection.makeConnectionByObject(finger[1].getSuccessor().getIP(),finger[1].getSuccessor().getPort(),request);
         String[] tokens2 = result2.getInitInfo().split("/");
+
         pred = new Node(Integer.parseInt(tokens2[0]),tokens2[1],tokens2[2]);
+        nodeInfo.setPred(pred);
 
         request.setInitInfo("setPred/" + me.getID() + "/" + me.getIP() + "/" + me.getPort());
         makeConnection.makeConnectionByObject(finger[1].getSuccessor().getIP(),finger[1].getSuccessor().getPort(),request);
@@ -144,7 +145,7 @@ public class FingerServiceImpl implements FingerService {
             } else {
 
                 request.setInitInfo("findSuc/" + finger[i+1].getStart());
-                Message result4 = makeConnection.makeConnectionByObject(n.getIP(),n.getPort(),request);
+                Message result4 = makeConnection.makeConnectionByObject(pred.getIP(),pred.getPort(),request);
                 String[] tokens4 = result4.getInitInfo().split("/");
 
                 int fiStart = finger[i+1].getStart();
@@ -167,13 +168,12 @@ public class FingerServiceImpl implements FingerService {
         int m = nodeInfo.getM();
         int numDHT = nodeInfo.getNumDHT();
         Node me = nodeInfo.getMe();
-        Node p;
         for (int i = 1; i <= m; i++) {
             int id = me.getID() - (int)Math.pow(2,i-1) + 1;
             if (id < 0)
                 id = id + numDHT;
 
-            p = nodeService.find_predecessor(id);
+            Node p = nodeService.find_predecessor(id);
 
             Message request = new Message();
             request.setInitNode_flag(1);

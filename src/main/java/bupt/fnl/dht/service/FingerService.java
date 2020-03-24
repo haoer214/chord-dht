@@ -13,9 +13,8 @@ public interface FingerService {
     void initTable(String... args);
     /**
      * 初始化路由表
-     * @param n
      */
-    void init_finger_table(Node n) throws Exception;
+    void init_finger_table();
 
     /**
      * 更新路由表
